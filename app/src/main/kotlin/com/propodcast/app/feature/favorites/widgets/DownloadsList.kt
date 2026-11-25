@@ -1,7 +1,8 @@
 package com.propodcast.app.feature.favorites.widgets
 
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -28,7 +29,10 @@ internal fun DownloadsList(
         MessageState(stringResource(R.string.favorites_downloads_empty), modifier)
         return
     }
-    LazyColumn(modifier.testTag(DOWNLOADS_LIST_TAG)) {
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = LIST_COLUMN_MIN_WIDTH),
+        modifier = modifier.testTag(DOWNLOADS_LIST_TAG),
+    ) {
         items(downloads, key = { it.episode.id }) { download ->
             val episode = download.episode
             val cancel = { actions.onCancel?.invoke(episode) }

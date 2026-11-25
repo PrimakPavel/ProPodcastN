@@ -1,10 +1,13 @@
 package com.propodcast.app.feature.player
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,28 +20,22 @@ import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.propodcast.app.R
 import com.propodcast.app.core.commonwidgets.PodcastImage
 import com.propodcast.app.core.model.EpisodeDownloadState
-import com.propodcast.app.core.player.PlayerController
-import com.propodcast.app.feature.player.widgets.DownloadButton
-import com.propodcast.app.feature.player.widgets.PlayPauseButton
-import com.propodcast.app.feature.player.widgets.PlayerSeekBar
-import com.propodcast.app.feature.player.widgets.SkipButton
-import com.propodcast.app.feature.player.widgets.SpeedButton
-import com.propodcast.app.feature.player.widgets.playerSubtitle
+import com.propodcast.app.feature.player.widgets.PlayerControls
+import com.propodcast.app.feature.player.widgets.PlayerTitles
 
-/** Stateless full player: artwork, titles, seek bar, -15 / play / +30, speed menu and download. Also used by UI tests. */
+/**
+ * Stateless full player: artwork, titles, seek bar, -15 / play / +30, speed menu and download; in landscape
+ * the artwork sits beside the controls. Also used by UI tests.
+ */
 @OptIn(ExperimentalMaterial3Api::class) // BottomSheetDefaults.DragHandle
 @Composable
 fun FullPlayerContent(
@@ -58,72 +55,90 @@ fun FullPlayerContent(
 ) {
     val playback = state.playback
     val item = playback.nowPlaying ?: return
-    Column(
+    val controls: @Composable (Modifier) -> Unit = { controlsModifier ->
+        PlayerControls(
+            playback = playback,
+            onTogglePlayPause = onTogglePlayPause,
+            onSeekTo = onSeekTo,
+            onSeekBack = onSeekBack,
+            onSeekForward = onSeekForward,
+            onSpeedSelected = onSpeedSelected,
+            downloadState = downloadState,
+            onDownloadClick = onDownloadClick,
+            modifier = controlsModifier,
+        )
+    }
+    BoxWithConstraints(
         modifier = modifier
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
+            .fillMaxSize()
             .padding(horizontal = 24.dp)
             .testTag(FULL_PLAYER_TAG),
-        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        BottomSheetDefaults.DragHandle(Modifier.align(Alignment.CenterHorizontally))
-        Row(Modifier.fillMaxWidth()) {
-            IconButton(onClick = onCollapse) {
-                Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.player_collapse))
+        val landscape = maxWidth > maxHeight * LANDSCAPE_RATIO
+        Column(Modifier.fillMaxSize()) {
+            val collapseButton = @Composable { buttonModifier: Modifier ->
+                IconButton(onClick = onCollapse, modifier = buttonModifier) {
+                    Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.player_collapse))
+                }
+            }
+            if (landscape) {
+                // Low screen: ⌄ beside the handle instead of under it, so the content starts higher.
+                Box(Modifier.fillMaxWidth()) {
+                    BottomSheetDefaults.DragHandle(Modifier.align(Alignment.Center))
+                    collapseButton(Modifier.align(Alignment.CenterStart))
+                }
+            } else {
+                BottomSheetDefaults.DragHandle(Modifier.align(Alignment.CenterHorizontally))
+                collapseButton(Modifier)
+            }
+            if (landscape) {
+                // Artwork on the left at full height, titles and controls on the right.
+                Row(
+                    modifier = Modifier.fillMaxSize().padding(bottom = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(32.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    PodcastImage(
+                        url = item.imageUrl,
+                        modifier = artworkModifier
+                            .weight(0.4f, fill = false)
+                            .aspectRatio(1f),
+                    )
+                    Column(
+                        modifier = Modifier
+                            .weight(0.6f)
+                            .verticalScroll(rememberScrollState()),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        PlayerTitles(state)
+                        Spacer(Modifier.height(16.dp))
+                        controls(Modifier.widthIn(max = 480.dp))
+                    }
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    PodcastImage(
+                        url = item.imageUrl,
+                        modifier = artworkModifier
+                            .widthIn(max = 320.dp)
+                            .fillMaxWidth(0.85f)
+                            .aspectRatio(1f),
+                    )
+                    Spacer(Modifier.height(24.dp))
+                    PlayerTitles(state)
+                    Spacer(Modifier.height(16.dp))
+                    controls(Modifier.fillMaxWidth())
+                    Spacer(Modifier.height(24.dp))
+                }
             }
         }
-        PodcastImage(
-            url = item.imageUrl,
-            modifier = artworkModifier
-                .widthIn(max = 320.dp)
-                .fillMaxWidth(0.85f)
-                .aspectRatio(1f),
-        )
-        Spacer(Modifier.height(24.dp))
-        Text(
-            text = item.title,
-            style = MaterialTheme.typography.titleLarge,
-            textAlign = TextAlign.Center,
-            maxLines = 3,
-            overflow = TextOverflow.Ellipsis,
-        )
-        playerSubtitle(state)?.let { subtitle ->
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (playback.error != null) {
-                    MaterialTheme.colorScheme.error
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 4.dp),
-            )
-        }
-        Spacer(Modifier.height(16.dp))
-        PlayerSeekBar(positionMs = playback.positionMs, durationMs = playback.durationMs, onSeek = onSeekTo)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterHorizontally),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            SkipButton(seconds = (PlayerController.SEEK_BACK_MS / 1_000).toInt(), forward = false, onClick = onSeekBack)
-            PlayPauseButton(
-                isPlaying = playback.isPlaying,
-                isBuffering = playback.isBuffering,
-                onClick = onTogglePlayPause,
-                large = true,
-            )
-            SkipButton(seconds = (PlayerController.SEEK_FORWARD_MS / 1_000).toInt(), forward = true, onClick = onSeekForward)
-        }
-        Spacer(Modifier.height(16.dp))
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            SpeedButton(speed = playback.speed, onSpeedSelected = onSpeedSelected)
-            if (onDownloadClick != null) DownloadButton(state = downloadState, onClick = onDownloadClick)
-        }
-        Spacer(Modifier.height(24.dp))
     }
 }
+
+/** Wider than this many times its height: artwork beside the controls instead of above them. */
+private const val LANDSCAPE_RATIO = 1.2f

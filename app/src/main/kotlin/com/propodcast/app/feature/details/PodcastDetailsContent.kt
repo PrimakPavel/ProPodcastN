@@ -2,6 +2,11 @@ package com.propodcast.app.feature.details
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material3.VerticalDivider
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -101,24 +106,56 @@ fun PodcastDetailsContent(
                 LoadingState(contentModifier)
             }
             is DetailsContent.Error -> MessageState(content.error.message(), contentModifier, onRetry = onRetry)
-            is DetailsContent.Loaded -> LazyColumn(
-                modifier = contentModifier.testTag(DETAILS_LIST_TAG),
-                contentPadding = PaddingValues(vertical = 16.dp),
-            ) {
-                item(key = "header") {
-                    val podcast = content.podcast
-                    // Keep the list's artwork so the image doesn't change once the details arrive.
-                    PodcastDetailsHeader(
-                        podcast = podcast.copy(thumbnailUrl = preview.artworkUrl ?: podcast.thumbnailUrl),
-                        artworkModifier = artworkModifier,
-                    )
+            is DetailsContent.Loaded -> BoxWithConstraints(contentModifier) {
+                val header: LazyListScope.() -> Unit = {
+                    item(key = "header") {
+                        val podcast = content.podcast
+                        // Keep the list's artwork so the image doesn't change once the details arrive.
+                        PodcastDetailsHeader(
+                            podcast = podcast.copy(thumbnailUrl = preview.artworkUrl ?: podcast.thumbnailUrl),
+                            artworkModifier = artworkModifier,
+                        )
+                    }
+                    recommendationsSection(state.recommendations, onPodcastClick)
                 }
-                recommendationsSection(state.recommendations, onPodcastClick)
-                episodesSection(
-                    content, state.favoriteEpisodeIds, onEpisodeClick, onToggleEpisodeFavorite, onShareEpisode, downloads,
-                )
-                loadMoreFooter(content, onLoadMore)
+                val episodes: LazyListScope.() -> Unit = {
+                    episodesSection(
+                        content, state.favoriteEpisodeIds, onEpisodeClick, onToggleEpisodeFavorite, onShareEpisode, downloads,
+                    )
+                    loadMoreFooter(content, onLoadMore)
+                }
+                if (maxWidth >= TWO_PANE_MIN_WIDTH) {
+                    // Wide: the podcast on the left, its episodes on the right, each scrolling on its own.
+                    Row(Modifier.fillMaxSize()) {
+                        LazyColumn(
+                            modifier = Modifier.weight(LEFT_PANE_WEIGHT).fillMaxHeight(),
+                            contentPadding = PaddingValues(vertical = 16.dp),
+                            content = header,
+                        )
+                        VerticalDivider()
+                        LazyColumn(
+                            modifier = Modifier
+                                .weight(1f - LEFT_PANE_WEIGHT)
+                                .fillMaxHeight()
+                                .testTag(DETAILS_LIST_TAG),
+                            contentPadding = PaddingValues(vertical = 8.dp),
+                            content = episodes,
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize().testTag(DETAILS_LIST_TAG),
+                        contentPadding = PaddingValues(vertical = 16.dp),
+                    ) {
+                        header()
+                        episodes()
+                    }
+                }
             }
         }
     }
 }
+
+/** From this content width the details split into two panes (tablets, landscape). */
+private val TWO_PANE_MIN_WIDTH = 840.dp
+private const val LEFT_PANE_WEIGHT = 0.42f

@@ -1,6 +1,9 @@
 package com.propodcast.app.feature.player.widgets
 
 import androidx.compose.animation.core.animate
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -20,8 +23,8 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 /**
- * Pull the content down to dismiss it, like a bottom sheet. Works with scrollable content inside:
- * the pull starts only once the content is scrolled to the top. Released past [threshold] or with a
+ * Pull the content down to dismiss it, like a bottom sheet: anywhere that doesn't scroll, and on scrollable
+ * content once it is scrolled to the top. Released past [threshold] or with a
  * fast downward fling it calls [onDismiss], otherwise it springs back.
  */
 @Composable
@@ -31,6 +34,19 @@ internal fun rememberDragToDismiss(onDismiss: () -> Unit): Modifier {
     val threshold = with(LocalDensity.current) { DISMISS_DISTANCE.toPx() }
     val minFlingVelocity = with(LocalDensity.current) { DISMISS_FLING_VELOCITY.toPx() }
     var offsetY by remember { mutableFloatStateOf(0f) }
+
+    /** Releasing the pull: far or fast enough closes the player, otherwise it springs back. */
+    fun settle(velocityY: Float) {
+        if (offsetY <= 0f) return
+        if (offsetY > threshold || velocityY > minFlingVelocity) {
+            currentOnDismiss() // the exit animation continues from the current offset
+        } else {
+            scope.launch { animate(offsetY, 0f) { value, _ -> offsetY = value } }
+        }
+    }
+
+    // Parts that don't scroll (the handle and ⌄ row, the artwork in landscape) are dragged directly.
+    val dragState = rememberDraggableState { delta -> offsetY = (offsetY + delta).coerceAtLeast(0f) }
 
     val connection = remember {
         object : NestedScrollConnection {
@@ -55,17 +71,18 @@ internal fun rememberDragToDismiss(onDismiss: () -> Unit): Modifier {
 
             override suspend fun onPreFling(available: Velocity): Velocity {
                 if (offsetY <= 0f) return Velocity.Zero
-                if (offsetY > threshold || available.y > minFlingVelocity) {
-                    currentOnDismiss() // the exit animation continues from the current offset
-                } else {
-                    scope.launch { animate(offsetY, 0f) { value, _ -> offsetY = value } }
-                }
+                settle(available.y)
                 return available
             }
         }
     }
     return Modifier
         .nestedScroll(connection)
+        .draggable(
+            state = dragState,
+            orientation = Orientation.Vertical,
+            onDragStopped = { velocity -> settle(velocity) },
+        )
         .graphicsLayer { translationY = offsetY }
 }
 

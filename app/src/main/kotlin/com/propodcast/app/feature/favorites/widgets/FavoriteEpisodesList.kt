@@ -1,7 +1,8 @@
 package com.propodcast.app.feature.favorites.widgets
 
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -26,7 +27,10 @@ internal fun FavoriteEpisodesList(
         MessageState(stringResource(R.string.favorites_episodes_empty), modifier)
         return
     }
-    LazyColumn(modifier.testTag(FAVORITE_EPISODES_LIST_TAG)) {
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = LIST_COLUMN_MIN_WIDTH),
+        modifier = modifier.testTag(FAVORITE_EPISODES_LIST_TAG),
+    ) {
         items(episodes, key = { it.id }) { episode ->
             SwipeToRemove(onRemove = { onRemove(episode) }, modifier = removableItemModifier()) {
                 EpisodeListItem(

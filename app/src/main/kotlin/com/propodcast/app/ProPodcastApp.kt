@@ -12,7 +12,11 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
+import androidx.window.core.layout.WindowSizeClass
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -74,7 +78,16 @@ fun ProPodcastApp(
 
     // One layout for the app and the full player, so the artwork can fly between mini and full player.
     SharedTransitionLayout(modifier) {
+    // A phone in landscape is short: a navigation rail instead of a bottom bar leaves the height to the content.
+    val adaptiveInfo = currentWindowAdaptiveInfo()
+    val tallEnough = adaptiveInfo.windowSizeClass.isHeightAtLeastBreakpoint(WindowSizeClass.HEIGHT_DP_MEDIUM_LOWER_BOUND)
+    val navigationType = if (tallEnough) {
+        NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo)
+    } else {
+        NavigationSuiteType.NavigationRail
+    }
     NavigationSuiteScaffold(
+        layoutType = navigationType,
         navigationSuiteItems = {
             TopLevelDestination.entries.forEach { destination ->
                 item(
