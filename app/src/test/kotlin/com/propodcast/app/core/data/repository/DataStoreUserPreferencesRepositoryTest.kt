@@ -4,6 +4,7 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import app.cash.turbine.test
 import com.propodcast.app.core.model.LastPlayed
 import com.propodcast.app.core.model.PodcastFilters
+import com.propodcast.app.core.model.ThemeMode
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -88,6 +89,16 @@ class DataStoreUserPreferencesRepositoryTest {
             assertEquals(false, awaitItem())
             repository.setDownloadOnlyOnWifi(true)
             assertEquals(true, awaitItem())
+        }
+    }
+
+    @Test
+    fun themeMode_followsDeviceByDefault_andPersists() = runTest(UnconfinedTestDispatcher()) {
+        val repository = repository()
+        repository.themeMode.test {
+            assertEquals(ThemeMode.SYSTEM, awaitItem())
+            repository.setThemeMode(ThemeMode.DARK)
+            assertEquals(ThemeMode.DARK, awaitItem())
         }
     }
 }

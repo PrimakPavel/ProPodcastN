@@ -16,6 +16,7 @@ fun SettingsScreen(
     SettingsContent(
         state = state,
         onBack = onBack,
+        onThemeModeChange = viewModel::setThemeMode,
         onDownloadOnlyOnWifiChange = viewModel::setDownloadOnlyOnWifi,
         modifier = modifier,
     )

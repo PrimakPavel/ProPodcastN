@@ -3,6 +3,7 @@ package com.propodcast.app.core.testing
 import com.propodcast.app.core.data.repository.UserPreferencesRepository
 import com.propodcast.app.core.model.LastPlayed
 import com.propodcast.app.core.model.PodcastFilters
+import com.propodcast.app.core.model.ThemeMode
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class FakeUserPreferencesRepository(initial: PodcastFilters = PodcastFilters()) : UserPreferencesRepository {
@@ -12,6 +13,12 @@ class FakeUserPreferencesRepository(initial: PodcastFilters = PodcastFilters()) 
 
     override suspend fun setDownloadOnlyOnWifi(enabled: Boolean) {
         downloadOnlyOnWifi.value = enabled
+    }
+
+    override val themeMode = MutableStateFlow(ThemeMode.SYSTEM)
+
+    override suspend fun setThemeMode(mode: ThemeMode) {
+        themeMode.value = mode
     }
 
     override suspend fun setGenre(genreId: Int?) {

@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.propodcast.app.core.model.LastPlayed
 import com.propodcast.app.core.model.PodcastFilters
+import com.propodcast.app.core.model.ThemeMode
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
@@ -32,6 +33,10 @@ interface UserPreferencesRepository {
     /** Settings: downloads wait for Wi-Fi instead of using mobile data. Off by default. */
     val downloadOnlyOnWifi: Flow<Boolean>
     suspend fun setDownloadOnlyOnWifi(enabled: Boolean)
+
+    /** Settings: app theme. Follows the device by default. */
+    val themeMode: Flow<ThemeMode>
+    suspend fun setThemeMode(mode: ThemeMode)
 }
 
 @Singleton
@@ -70,6 +75,12 @@ class DataStoreUserPreferencesRepository @Inject constructor(
         .distinctUntilChanged()
 
     override suspend fun setDownloadOnlyOnWifi(enabled: Boolean) = edit(Keys.DOWNLOAD_ONLY_ON_WIFI, enabled)
+
+    override val themeMode: Flow<ThemeMode> = dataStore.data
+        .map { prefs -> ThemeMode.entries.firstOrNull { it.name == prefs[Keys.THEME_MODE] } ?: ThemeMode.SYSTEM }
+        .distinctUntilChanged()
+
+    override suspend fun setThemeMode(mode: ThemeMode) = edit(Keys.THEME_MODE, mode.name)
 
     override suspend fun setGenre(genreId: Int?) = edit(Keys.GENRE_ID, genreId)
 
@@ -126,5 +137,6 @@ class DataStoreUserPreferencesRepository @Inject constructor(
         val LAST_DURATION_MS = longPreferencesKey("last_duration_ms")
 
         val DOWNLOAD_ONLY_ON_WIFI = booleanPreferencesKey("download_only_on_wifi")
+        val THEME_MODE = stringPreferencesKey("theme_mode")
     }
 }
