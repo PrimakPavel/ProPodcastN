@@ -20,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.paging.compose.LazyPagingItems
 import com.propodcast.app.R
 import com.propodcast.app.core.commonwidgets.FloatingHeader
+import com.propodcast.app.core.commonwidgets.PagedPodcastGrid
 import com.propodcast.app.core.commonwidgets.QuotaBanner
 import com.propodcast.app.core.commonwidgets.rememberFloatingHeaderScrollBehavior
 import com.propodcast.app.core.model.ApiQuota
@@ -27,7 +28,6 @@ import com.propodcast.app.core.model.Podcast
 import com.propodcast.app.feature.filters.FiltersTab
 import com.propodcast.app.feature.filters.FiltersUiState
 import com.propodcast.app.feature.home.widgets.ActiveFilters
-import com.propodcast.app.feature.home.widgets.PodcastsList
 
 /** Stateless home content, also used by UI tests. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,7 +76,15 @@ fun HomeContent(
             FloatingHeader(filtersScrollBehavior, Modifier.testTag(FILTER_CHIPS_TAG)) {
                 ActiveFilters(filtersState, onOpenFilters, onClearGenre, onClearRegion)
             }
-            PodcastsList(podcasts, favoriteIds, onPodcastClick, onToggleFavorite, onShare)
+            PagedPodcastGrid(
+                podcasts = podcasts,
+                favoriteIds = favoriteIds,
+                emptyMessage = stringResource(R.string.home_empty),
+                onPodcastClick = onPodcastClick,
+                onToggleFavorite = onToggleFavorite,
+                onShare = onShare,
+                gridTestTag = PODCASTS_LIST_TAG,
+            )
         }
     }
 }

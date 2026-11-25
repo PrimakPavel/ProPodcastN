@@ -4,6 +4,7 @@ import com.propodcast.app.core.model.Genre
 import com.propodcast.app.core.model.PodcastFilters
 import com.propodcast.app.core.model.Region
 import com.propodcast.app.core.network.ListenNotesApi
+import com.propodcast.app.core.ui.OptionsState
 
 data class FiltersUiState(
     val genres: OptionsState<Genre> = OptionsState.Loading,

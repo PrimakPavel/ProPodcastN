@@ -1,4 +1,4 @@
-package com.propodcast.app.feature.filters.widgets
+package com.propodcast.app.core.commonwidgets
 
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -7,14 +7,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.propodcast.app.R
-import com.propodcast.app.core.commonwidgets.LoadingState
-import com.propodcast.app.core.commonwidgets.MessageState
+import com.propodcast.app.core.ui.OptionsState
 import com.propodcast.app.core.ui.message
-import com.propodcast.app.feature.filters.OptionsState
 
 /** Loading / error with retry / loaded list of filter options. */
 @Composable
-internal fun <T> OptionsList(
+fun <T> OptionsList(
     options: OptionsState<T>,
     onRetry: () -> Unit,
     modifier: Modifier,

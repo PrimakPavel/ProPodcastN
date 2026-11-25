@@ -24,7 +24,9 @@ fun AppNavHost(
             HomeScreen(onPodcastClick = { navController.navigate(PodcastDetailsRoute(it.id)) })
         }
         composable<FavoritesRoute> { FavoritesScreen() }
-        composable<SearchRoute> { SearchScreen() }
+        composable<SearchRoute> {
+            SearchScreen(onPodcastClick = { navController.navigate(PodcastDetailsRoute(it.id)) })
+        }
         composable<PodcastDetailsRoute> {
             PodcastDetailsScreen(
                 onBack = navController::navigateUp,

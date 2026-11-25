@@ -1,4 +1,4 @@
-package com.propodcast.app.feature.home.widgets
+package com.propodcast.app.core.commonwidgets
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,13 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
-import com.propodcast.app.core.commonwidgets.ListFooterError
-import com.propodcast.app.core.model.Podcast
 import com.propodcast.app.core.ui.userMessage
 
-/** Loading spinner or retryable error after the last loaded page. */
-internal fun LazyGridScope.appendFooter(podcasts: LazyPagingItems<Podcast>) {
-    when (val append = podcasts.loadState.append) {
+/** Full-width spinner or retryable error after the last loaded page of a paged grid. */
+fun <T : Any> LazyGridScope.pagingAppendFooter(items: LazyPagingItems<T>) {
+    when (val append = items.loadState.append) {
         is LoadState.Loading -> item(key = "append-loading", span = { GridItemSpan(maxLineSpan) }) {
             Box(
                 modifier = Modifier
@@ -29,7 +27,7 @@ internal fun LazyGridScope.appendFooter(podcasts: LazyPagingItems<Podcast>) {
             }
         }
         is LoadState.Error -> item(key = "append-error", span = { GridItemSpan(maxLineSpan) }) {
-            ListFooterError(message = append.error.userMessage(), onRetry = podcasts::retry)
+            ListFooterError(message = append.error.userMessage(), onRetry = items::retry)
         }
         is LoadState.NotLoading -> Unit
     }

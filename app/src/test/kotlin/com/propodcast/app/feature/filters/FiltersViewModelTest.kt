@@ -9,6 +9,7 @@ import com.propodcast.app.core.model.Region
 import com.propodcast.app.core.testing.FakePodcastRepository
 import com.propodcast.app.core.testing.FakeUserPreferencesRepository
 import com.propodcast.app.core.testing.MainDispatcherRule
+import com.propodcast.app.core.ui.OptionsState
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

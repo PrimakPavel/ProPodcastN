@@ -28,8 +28,14 @@ class FakePodcastRepository : PodcastRepository {
         return flowOf(PagingData.from(bestPodcastsResult(genreId, region), sourceLoadStates = COMPLETE))
     }
 
-    override fun searchPodcasts(query: String, language: String?): Flow<PagingData<Podcast>> =
-        flowOf(PagingData.empty())
+    val searchRequests = mutableListOf<Pair<String, String?>>()
+    var searchResult: (query: String, language: String?) -> List<Podcast> = { _, _ -> emptyList() }
+    var languagesResult: Result<List<String>> = Result.success(emptyList())
+
+    override fun searchPodcasts(query: String, language: String?): Flow<PagingData<Podcast>> {
+        searchRequests += query to language
+        return flowOf(PagingData.from(searchResult(query, language), sourceLoadStates = COMPLETE))
+    }
 
     override suspend fun podcastDetails(id: String, nextEpisodePubDate: Long?): Result<PodcastDetails> {
         detailsRequests += id to nextEpisodePubDate
@@ -42,7 +48,7 @@ class FakePodcastRepository : PodcastRepository {
 
     override suspend fun regions(): Result<List<Region>> = regionsResult
 
-    override suspend fun languages(): Result<List<String>> = Result.success(emptyList())
+    override suspend fun languages(): Result<List<String>> = languagesResult
 
     private companion object {
         val COMPLETE = LoadState.NotLoading(endOfPaginationReached = true).let { LoadStates(it, it, it) }

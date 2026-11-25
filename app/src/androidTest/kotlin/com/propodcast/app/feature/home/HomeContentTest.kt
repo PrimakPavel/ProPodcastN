@@ -21,9 +21,9 @@ import com.propodcast.app.core.model.ApiQuota
 import com.propodcast.app.core.model.Genre
 import com.propodcast.app.core.model.Podcast
 import com.propodcast.app.core.model.PodcastFilters
+import com.propodcast.app.core.ui.OptionsState
 import com.propodcast.app.feature.filters.FiltersTab
 import com.propodcast.app.feature.filters.FiltersUiState
-import com.propodcast.app.feature.filters.OptionsState
 import kotlinx.coroutines.flow.flowOf
 import org.junit.Assert.assertEquals
 import org.junit.Rule

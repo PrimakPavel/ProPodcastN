@@ -59,4 +59,13 @@
     <string name="details_show_more">Show more</string>
     <string name="details_show_less">Show less</string>
     <string name="details_no_episodes">No episodes yet.</string>
+
+    <!-- Search -->
+    <string name="search_placeholder">Search podcasts</string>
+    <string name="search_start">Find podcasts by name, topic or publisher.</string>
+    <string name="search_min_length">Type at least %1$d characters to search.</string>
+    <string name="search_empty">Nothing found for “%1$s”.</string>
+    <string name="search_language_any">Any language</string>
+    <string name="search_language_title">Search language</string>
+    <string name="action_clear_search">Clear search</string>
 </resources>

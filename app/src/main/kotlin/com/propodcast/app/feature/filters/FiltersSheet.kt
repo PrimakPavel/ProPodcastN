@@ -17,7 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.propodcast.app.feature.filters.widgets.OptionsList
+import com.propodcast.app.core.commonwidgets.OptionsList
 import com.propodcast.app.feature.filters.widgets.genreOptions
 import com.propodcast.app.feature.filters.widgets.regionOptions
 

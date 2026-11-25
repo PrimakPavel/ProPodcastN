@@ -1,4 +1,4 @@
-package com.propodcast.app.feature.filters.widgets
+package com.propodcast.app.core.commonwidgets
 
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.ListItem
@@ -10,7 +10,7 @@ import androidx.compose.ui.semantics.Role
 
 /** Selectable row with a radio button. */
 @Composable
-internal fun OptionRow(label: String, selected: Boolean, onClick: () -> Unit) {
+fun OptionRow(label: String, selected: Boolean, onClick: () -> Unit) {
     ListItem(
         headlineContent = { Text(label) },
         leadingContent = { RadioButton(selected = selected, onClick = null) },

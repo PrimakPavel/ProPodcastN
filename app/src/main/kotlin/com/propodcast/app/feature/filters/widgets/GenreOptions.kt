@@ -4,6 +4,7 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.res.stringResource
 import com.propodcast.app.R
+import com.propodcast.app.core.commonwidgets.OptionRow
 import com.propodcast.app.core.model.Genre
 
 /** "All genres" plus one radio row per genre. */

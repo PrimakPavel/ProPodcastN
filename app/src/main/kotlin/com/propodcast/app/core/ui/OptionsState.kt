@@ -1,4 +1,4 @@
-package com.propodcast.app.feature.filters
+package com.propodcast.app.core.ui
 
 import com.propodcast.app.core.common.AppError
 
