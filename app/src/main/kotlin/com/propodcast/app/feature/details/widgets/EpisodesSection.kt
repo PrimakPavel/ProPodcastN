@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import com.propodcast.app.R
 import com.propodcast.app.core.commonwidgets.EpisodeListItem
 import com.propodcast.app.core.model.Episode
+import com.propodcast.app.core.ui.EpisodeDownloadActions
 import com.propodcast.app.feature.details.DetailsContent
 
 /** "Episodes" title and the loaded episodes (or a "No episodes yet" note). */
@@ -20,6 +21,7 @@ internal fun LazyListScope.episodesSection(
     onEpisodeClick: (Episode) -> Unit,
     onToggleFavorite: (Episode) -> Unit,
     onShare: (Episode) -> Unit,
+    downloads: EpisodeDownloadActions,
 ) {
     item(key = "episodes-title") { SectionTitle(stringResource(R.string.details_episodes)) }
     if (content.episodes.isEmpty()) {
@@ -38,6 +40,7 @@ internal fun LazyListScope.episodesSection(
             onClick = { onEpisodeClick(episode) },
             onToggleFavorite = { onToggleFavorite(episode) },
             onShare = episode.listennotesUrl?.let { { onShare(episode) } },
+            downloads = downloads,
         )
     }
 }

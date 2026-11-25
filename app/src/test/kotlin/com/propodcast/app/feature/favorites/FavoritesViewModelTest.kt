@@ -1,7 +1,11 @@
 package com.propodcast.app.feature.favorites
 
 import app.cash.turbine.test
-import com.propodcast.app.core.model.RemovedFavorite
+import com.propodcast.app.R
+import com.propodcast.app.core.model.DownloadStatus
+import com.propodcast.app.core.model.EpisodeDownload
+import com.propodcast.app.core.model.EpisodeDownloadState
+import com.propodcast.app.core.testing.FakeDownloadsRepository
 import com.propodcast.app.core.testing.FakeFavoritesRepository
 import com.propodcast.app.core.testing.MainDispatcherRule
 import com.propodcast.app.core.testing.testEpisode
@@ -22,15 +26,16 @@ class FavoritesViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val favorites = FakeFavoritesRepository()
+    private val downloads = FakeDownloadsRepository()
 
     /** uiState is WhileSubscribed: keep a collector so combine() runs. */
-    private fun TestScope.subscribed() = FavoritesViewModel(favorites).also { vm ->
+    private fun TestScope.subscribed() = FavoritesViewModel(favorites, downloads).also { vm ->
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.uiState.collect {} }
     }
 
     @Test
     fun loading_untilRoomEmits_thenNewestFirst() = runTest {
-        assertTrue(FavoritesViewModel(favorites).uiState.value.isLoading)
+        assertTrue(FavoritesViewModel(favorites, downloads).uiState.value.isLoading)
 
         favorites.setPodcastFavorite(testPodcast("p1"), true)
         favorites.setPodcastFavorite(testPodcast("p2"), true)
@@ -44,37 +49,56 @@ class FavoritesViewModelTest {
     }
 
     @Test
-    fun removePodcast_emitsRemoved_andUndoRestoresSamePosition() = runTest {
+    fun removePodcast_offersUndo_thatRestoresSamePosition() = runTest {
         listOf("p1", "p2", "p3").forEach { favorites.setPodcastFavorite(testPodcast(it), true) }
         val vm = subscribed()
 
-        vm.removed.test {
+        vm.snackbarEvents.test {
             vm.removePodcast(testPodcast("p2"))
-            val removed = awaitItem()
-            assertEquals("p2", (removed as RemovedFavorite.PodcastItem).podcast.id)
+            val event = awaitItem()
+            assertEquals(R.string.favorite_removed, event.messageRes)
+            assertEquals(listOf("Podcast p2"), event.messageArgs)
+            assertEquals(R.string.action_undo, event.actionLabelRes)
             assertEquals(listOf("p3", "p1"), vm.uiState.value.podcasts.map { it.id })
 
-            vm.undoRemove(removed)
+            event.onAction()
             assertEquals("undo keeps the original order", listOf("p3", "p2", "p1"), vm.uiState.value.podcasts.map { it.id })
         }
     }
 
     @Test
-    fun removeEpisode_emitsRemoved() = runTest {
+    fun removeEpisode_offersUndo() = runTest {
         favorites.setEpisodeFavorite(testEpisode("e1"), true)
         val vm = subscribed()
 
-        vm.removed.test {
+        vm.snackbarEvents.test {
             vm.removeEpisode(testEpisode("e1"))
-            assertEquals("e1", (awaitItem() as RemovedFavorite.EpisodeItem).episode.id)
+            assertEquals(listOf("Episode e1"), awaitItem().messageArgs)
             assertTrue(vm.uiState.value.episodes.isEmpty())
         }
     }
 
     @Test
+    fun downloads_runningFirst() = runTest {
+        val running = EpisodeDownload(
+            testEpisode("e2"),
+            EpisodeDownloadState(DownloadStatus.DOWNLOADING),
+            addedAtMs = 1,
+        )
+        val done = running.copy(
+            episode = testEpisode("e1"),
+            state = EpisodeDownloadState(DownloadStatus.DOWNLOADED),
+        )
+        downloads.downloads.value = listOf(done, running)
+        val vm = subscribed()
+
+        assertEquals(listOf("e2", "e1"), vm.uiState.value.downloads.map { it.episode.id })
+    }
+
+    @Test
     fun removingMissingFavorite_emitsNothing() = runTest {
         val vm = subscribed()
-        vm.removed.test {
+        vm.snackbarEvents.test {
             vm.removePodcast(testPodcast("nope"))
             expectNoEvents()
         }

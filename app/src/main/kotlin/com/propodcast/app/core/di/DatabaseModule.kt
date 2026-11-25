@@ -3,6 +3,7 @@ package com.propodcast.app.core.di
 import android.content.Context
 import androidx.room.Room
 import com.propodcast.app.core.database.ProPodcastDatabase
+import com.propodcast.app.core.database.dao.DownloadedEpisodeDao
 import com.propodcast.app.core.database.dao.FavoriteEpisodeDao
 import com.propodcast.app.core.database.dao.FavoritePodcastDao
 import dagger.Module
@@ -26,4 +27,7 @@ object DatabaseModule {
 
     @Provides
     fun provideFavoriteEpisodeDao(db: ProPodcastDatabase): FavoriteEpisodeDao = db.favoriteEpisodeDao()
+
+    @Provides
+    fun provideDownloadedEpisodeDao(db: ProPodcastDatabase): DownloadedEpisodeDao = db.downloadedEpisodeDao()
 }

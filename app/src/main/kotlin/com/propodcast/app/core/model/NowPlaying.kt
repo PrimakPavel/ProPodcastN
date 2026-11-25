@@ -40,3 +40,18 @@ fun LastPlayed.toNowPlaying() = NowPlaying(
     imageUrl = imageUrl,
     durationMs = durationMs,
 )
+
+/** The player's episode as an [Episode] (e.g. to download it); what the player doesn't know stays empty. */
+fun NowPlaying.toEpisode() = Episode(
+    id = episodeId,
+    title = title,
+    description = "",
+    audioUrl = audioUrl,
+    imageUrl = imageUrl,
+    thumbnailUrl = imageUrl,
+    pubDateMs = 0,
+    durationSec = (durationMs / 1_000).toInt(),
+    listennotesUrl = null,
+    podcastId = null,
+    podcastTitle = podcastTitle,
+)

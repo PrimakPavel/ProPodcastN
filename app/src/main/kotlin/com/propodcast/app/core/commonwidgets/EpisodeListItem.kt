@@ -13,7 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -34,10 +33,14 @@ import androidx.compose.ui.unit.dp
 import com.propodcast.app.R
 import com.propodcast.app.core.designsystem.theme.ProPodcastTheme
 import com.propodcast.app.core.model.Episode
+import com.propodcast.app.core.ui.EpisodeDownloadActions
 import com.propodcast.app.core.ui.formatDuration
 import com.propodcast.app.core.ui.formatPubDate
 
-/** One episode: artwork, title, date · duration, favorite toggle and a Share menu (when [onShare] is set). */
+/**
+ * One episode: artwork, title, date · duration with the download state mark, a favorite toggle and a menu
+ * with Share and the download action that fits the state (Download / Cancel download / Delete download).
+ */
 @Composable
 fun EpisodeListItem(
     episode: Episode,
@@ -46,7 +49,9 @@ fun EpisodeListItem(
     onToggleFavorite: () -> Unit,
     onShare: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    downloads: EpisodeDownloadActions = EpisodeDownloadActions(),
 ) {
+    val downloadState = downloads.stateOf(episode)
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -67,12 +72,18 @@ fun EpisodeListItem(
                 episode.pubDateMs.takeIf { it > 0 }?.let(::formatPubDate),
                 formatDuration(episode.durationSec).ifEmpty { null },
             ).filterNotNull().joinToString(" · ")
-            if (meta.isNotEmpty()) {
-                Text(
-                    text = meta,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+            if (meta.isNotEmpty() || downloadState != null) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = meta,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    if (downloadState != null) {
+                        Spacer(Modifier.width(6.dp))
+                        DownloadIndicator(downloadState, size = 14.dp)
+                    }
+                }
             }
         }
         IconButton(onClick = onToggleFavorite) {
@@ -84,21 +95,24 @@ fun EpisodeListItem(
                 tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        if (onShare != null) {
+        val menuItems = episodeMenuItems(episode, downloadState, downloads, onShare)
+        if (menuItems.isNotEmpty()) {
             var expanded by remember { mutableStateOf(false) }
             Box {
                 IconButton(onClick = { expanded = true }) {
                     Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.action_more))
                 }
                 DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.action_share)) },
-                        leadingIcon = { Icon(Icons.Filled.Share, contentDescription = null) },
-                        onClick = {
-                            expanded = false
-                            onShare()
-                        },
-                    )
+                    menuItems.forEach { item ->
+                        DropdownMenuItem(
+                            text = { Text(stringResource(item.labelRes)) },
+                            leadingIcon = { Icon(item.icon(), contentDescription = null) },
+                            onClick = {
+                                expanded = false
+                                item.onClick()
+                            },
+                        )
+                    }
                 }
             }
         }

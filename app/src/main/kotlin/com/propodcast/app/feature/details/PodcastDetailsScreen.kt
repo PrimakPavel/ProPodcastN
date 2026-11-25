@@ -14,6 +14,10 @@ import com.propodcast.app.R
 import com.propodcast.app.core.model.Episode
 import com.propodcast.app.core.model.Podcast
 import com.propodcast.app.core.ui.shareLink
+import com.propodcast.app.core.ui.SnackbarEffect
+import com.propodcast.app.feature.downloads.DownloadsViewModel
+import com.propodcast.app.feature.downloads.CellularDownloadPrompt
+import com.propodcast.app.feature.downloads.rememberEpisodeDownloadActions
 import kotlinx.coroutines.launch
 
 @Composable
@@ -24,8 +28,10 @@ fun PodcastDetailsScreen(
     modifier: Modifier = Modifier,
     preview: DetailsPreview = DetailsPreview(),
     viewModel: PodcastDetailsViewModel = hiltViewModel(),
+    downloadsViewModel: DownloadsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val downloads = rememberEpisodeDownloadActions(downloadsViewModel)
     val context = LocalContext.current
     val sharePodcastTitle = stringResource(R.string.share_chooser_title)
     val shareEpisodeTitle = stringResource(R.string.share_episode_chooser_title)
@@ -33,8 +39,12 @@ fun PodcastDetailsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
+    SnackbarEffect(downloadsViewModel.snackbarEvents, snackbarHostState)
+    CellularDownloadPrompt(downloadsViewModel)
+
     PodcastDetailsContent(
         state = state,
+        downloads = downloads,
         snackbarHostState = snackbarHostState,
         onBack = onBack,
         onRetry = viewModel::load,

@@ -10,6 +10,7 @@ import com.propodcast.app.R
 import com.propodcast.app.core.commonwidgets.EpisodeListItem
 import com.propodcast.app.core.commonwidgets.MessageState
 import com.propodcast.app.core.model.Episode
+import com.propodcast.app.core.ui.EpisodeDownloadActions
 import com.propodcast.app.feature.favorites.FAVORITE_EPISODES_LIST_TAG
 
 @Composable
@@ -19,6 +20,7 @@ internal fun FavoriteEpisodesList(
     onRemove: (Episode) -> Unit,
     onShare: (Episode) -> Unit,
     modifier: Modifier = Modifier,
+    downloads: EpisodeDownloadActions = EpisodeDownloadActions(),
 ) {
     if (episodes.isEmpty()) {
         MessageState(stringResource(R.string.favorites_episodes_empty), modifier)
@@ -33,6 +35,7 @@ internal fun FavoriteEpisodesList(
                     onClick = { onEpisodeClick(episode) },
                     onToggleFavorite = { onRemove(episode) },
                     onShare = episode.listennotesUrl?.let { { onShare(episode) } },
+                    downloads = downloads,
                 )
             }
         }

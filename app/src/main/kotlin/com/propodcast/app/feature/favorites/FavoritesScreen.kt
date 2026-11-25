@@ -1,10 +1,7 @@
 package com.propodcast.app.feature.favorites
 
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -16,8 +13,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.propodcast.app.R
 import com.propodcast.app.core.model.Episode
 import com.propodcast.app.core.model.Podcast
-import com.propodcast.app.core.model.RemovedFavorite
+import com.propodcast.app.core.ui.SnackbarEffect
 import com.propodcast.app.core.ui.shareLink
+import com.propodcast.app.feature.downloads.DownloadsViewModel
+import com.propodcast.app.feature.downloads.CellularDownloadPrompt
+import com.propodcast.app.feature.downloads.rememberEpisodeDownloadActions
 import kotlinx.coroutines.launch
 
 @Composable
@@ -26,34 +26,24 @@ fun FavoritesScreen(
     onPlayEpisode: (Episode) -> Boolean,
     modifier: Modifier = Modifier,
     viewModel: FavoritesViewModel = hiltViewModel(),
+    downloadsViewModel: DownloadsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val downloads = rememberEpisodeDownloadActions(downloadsViewModel)
     val context = LocalContext.current
     val sharePodcastTitle = stringResource(R.string.share_chooser_title)
     val shareEpisodeTitle = stringResource(R.string.share_episode_chooser_title)
     val noAudio = stringResource(R.string.player_no_audio)
-    val undoLabel = stringResource(R.string.action_undo)
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(viewModel) {
-        viewModel.removed.collect { removed ->
-            // A newer removal replaces the previous snackbar instead of waiting in the queue.
-            snackbarHostState.currentSnackbarData?.dismiss()
-            launch {
-                val result = snackbarHostState.showSnackbar(
-                    message = context.getString(R.string.favorite_removed, removed.title()),
-                    actionLabel = undoLabel,
-                    withDismissAction = true,
-                    duration = SnackbarDuration.Long,
-                )
-                if (result == SnackbarResult.ActionPerformed) viewModel.undoRemove(removed)
-            }
-        }
-    }
+    SnackbarEffect(viewModel.snackbarEvents, snackbarHostState)
+    SnackbarEffect(downloadsViewModel.snackbarEvents, snackbarHostState)
+    CellularDownloadPrompt(downloadsViewModel)
 
     FavoritesContent(
         state = state,
+        downloads = downloads,
         snackbarHostState = snackbarHostState,
         onPodcastClick = onPodcastClick,
         onRemovePodcast = viewModel::removePodcast,
@@ -71,7 +61,3 @@ fun FavoritesScreen(
     )
 }
 
-private fun RemovedFavorite.title(): String = when (this) {
-    is RemovedFavorite.PodcastItem -> podcast.title
-    is RemovedFavorite.EpisodeItem -> episode.title
-}

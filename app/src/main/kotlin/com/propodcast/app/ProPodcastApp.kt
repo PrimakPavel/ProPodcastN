@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -25,7 +27,12 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.propodcast.app.core.model.toEpisode
 import com.propodcast.app.core.ui.LocalSharedTransitionScope
+import com.propodcast.app.core.ui.SnackbarEffect
+import com.propodcast.app.feature.downloads.DownloadsViewModel
+import com.propodcast.app.feature.downloads.CellularDownloadPrompt
+import com.propodcast.app.feature.downloads.rememberEpisodeDownloadActions
 import com.propodcast.app.feature.player.FullPlayerOverlay
 import com.propodcast.app.feature.player.MiniPlayer
 import com.propodcast.app.feature.player.PlayerViewModel
@@ -38,8 +45,13 @@ fun ProPodcastApp(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     playerViewModel: PlayerViewModel = hiltViewModel(),
+    downloadsViewModel: DownloadsViewModel = hiltViewModel(),
 ) {
     val player by playerViewModel.uiState.collectAsStateWithLifecycle()
+    val downloads = rememberEpisodeDownloadActions(downloadsViewModel)
+    val playerSnackbar = remember { SnackbarHostState() }
+    SnackbarEffect(downloadsViewModel.snackbarEvents, playerSnackbar)
+    CellularDownloadPrompt(downloadsViewModel)
     var showFullPlayer by rememberSaveable { mutableStateOf(false) }
     val backStackEntry by navController.currentBackStackEntryAsState()
     // Keeps the tab highlighted while a nested screen (e.g. podcast details) is open.
@@ -81,6 +93,7 @@ fun ProPodcastApp(
         }
     }
 
+    val playingEpisode = player.playback.nowPlaying?.toEpisode()
     FullPlayerOverlay(
         visible = showFullPlayer && player.isVisible,
         state = player,
@@ -90,7 +103,10 @@ fun ProPodcastApp(
         onSeekTo = playerViewModel::seekTo,
         onSeekBack = playerViewModel::seekBack,
         onSeekForward = playerViewModel::seekForward,
-        onCycleSpeed = playerViewModel::cycleSpeed,
+        onSpeedSelected = playerViewModel::setSpeed,
+        downloadState = playingEpisode?.let { downloads.stateOf(it) },
+        onDownloadClick = playingEpisode?.let { episode -> { downloads.onPrimaryAction(episode) } },
+        snackbarHostState = playerSnackbar,
     )
     }
 }

@@ -29,6 +29,7 @@ import com.propodcast.app.core.commonwidgets.LoadingState
 import com.propodcast.app.core.commonwidgets.MessageState
 import com.propodcast.app.core.model.Episode
 import com.propodcast.app.core.model.Podcast
+import com.propodcast.app.core.ui.EpisodeDownloadActions
 import com.propodcast.app.core.ui.message
 import com.propodcast.app.core.ui.sharedArtwork
 import com.propodcast.app.feature.details.widgets.episodesSection
@@ -52,6 +53,7 @@ fun PodcastDetailsContent(
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     preview: DetailsPreview = DetailsPreview(),
+    downloads: EpisodeDownloadActions = EpisodeDownloadActions(),
 ) {
     val loaded = state.content as? DetailsContent.Loaded
     val artworkModifier = Modifier.sharedArtwork(preview.artworkKey)
@@ -119,7 +121,9 @@ fun PodcastDetailsContent(
                     )
                 }
                 recommendationsSection(state.recommendations, onPodcastClick)
-                episodesSection(content, state.favoriteEpisodeIds, onEpisodeClick, onToggleEpisodeFavorite, onShareEpisode)
+                episodesSection(
+                    content, state.favoriteEpisodeIds, onEpisodeClick, onToggleEpisodeFavorite, onShareEpisode, downloads,
+                )
                 loadMoreFooter(content, onLoadMore)
             }
         }

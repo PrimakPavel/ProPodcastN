@@ -7,7 +7,10 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import androidx.core.net.toUri
+import com.propodcast.app.core.data.repository.DownloadsRepository
 import com.propodcast.app.core.data.repository.UserPreferencesRepository
+import com.propodcast.app.core.model.DownloadStatus
 import com.propodcast.app.core.model.NowPlaying
 import com.propodcast.app.core.model.toLastPlayed
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -22,6 +25,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.guava.await
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -37,6 +43,7 @@ import timber.log.Timber
 class MediaPlayerController @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val preferences: UserPreferencesRepository,
+    private val downloads: DownloadsRepository,
 ) : PlayerController {
 
     // MediaController must be used on the main thread.
@@ -61,7 +68,11 @@ class MediaPlayerController @Inject constructor(
 
     override fun play(item: NowPlaying, startPositionMs: Long) {
         withController {
-            setMediaItem(item.toMediaItem(), startPositionMs)
+            // A downloaded episode plays from its file: works offline and saves data.
+            val localFile = downloads.localFile(item.episodeId)
+            val playUri = localFile?.toUri() ?: item.audioUrl.toUri()
+            Timber.d("Playing %s from %s", item.episodeId, if (localFile != null) "downloaded file" else "stream")
+            setMediaItem(item.toMediaItem(playUri), startPositionMs)
             prepare()
             play()
             preferences.setLastPlayed(item.toLastPlayed(startPositionMs))
@@ -76,8 +87,9 @@ class MediaPlayerController @Inject constructor(
                 play()
             }
             else -> {
-                // After an error the player is idle and must be prepared again.
-                if (playbackState == Player.STATE_IDLE) prepare()
+                // After an error (e.g. the stream lost the network) the player is idle and must be prepared
+                // again: from the downloaded file if there is one by now, otherwise the same source.
+                if (playbackState == Player.STATE_IDLE && !switchToDownloadedFile()) prepare()
                 play()
             }
         }
@@ -96,6 +108,41 @@ class MediaPlayerController @Inject constructor(
             stop()
             clearMediaItems()
             preferences.clearLastPlayed()
+        }
+    }
+
+    /**
+     * Moves the loaded episode from its stream to the downloaded file at the same position, keeping
+     * play / pause. False when it already plays a file or has no finished download.
+     */
+    private suspend fun MediaController.switchToDownloadedFile(): Boolean {
+        val current = currentMediaItem ?: return false
+        if (current.playsLocalFile()) return false
+        val item = current.toNowPlaying() ?: return false
+        val file = downloads.localFile(item.episodeId) ?: return false
+        val position = currentPosition
+        setMediaItem(item.toMediaItem(file.toUri()), position)
+        prepare()
+        Timber.d("Switched %s from stream to downloaded file at %d ms", item.episodeId, position)
+        return true
+    }
+
+    /** Once the episode in the player finishes downloading, it continues from the file (works offline). */
+    private fun followDownloads(controller: MediaController) {
+        scope.launch {
+            downloads.states
+                .map { states -> controller.currentMediaItem?.mediaId?.let { states[it]?.status } }
+                .distinctUntilChanged()
+                .filter { it == DownloadStatus.DOWNLOADED }
+                .collect {
+                    try {
+                        controller.switchToDownloadedFile()
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Timber.e(e, "Could not switch to the downloaded file")
+                    }
+                }
         }
     }
 
@@ -118,6 +165,7 @@ class MediaPlayerController @Inject constructor(
         ).buildAsync().await().also { connected ->
             connected.addListener(listener)
             controller = connected
+            followDownloads(connected)
             publish(connected)
             onIsPlayingChanged(connected)
         }

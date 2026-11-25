@@ -95,4 +95,27 @@
     <string name="widget_name">ProPodcast player</string>
     <string name="widget_description">The last episode with play / pause</string>
     <string name="widget_empty">Nothing played yet. Tap to find a podcast.</string>
+
+    <!-- Downloads -->
+    <string name="download_channel_name">Downloads</string>
+    <string name="download_notification_title">Downloading %1$s</string>
+    <string name="download_cancel">Cancel</string>
+    <string name="action_download">Download</string>
+    <string name="action_cancel_download">Cancel download</string>
+    <string name="action_delete_download">Delete download</string>
+    <string name="download_state_queued">Waiting to download</string>
+    <string name="download_state_downloading">Downloading %1$d%%</string>
+    <string name="download_state_downloading_unknown">Downloading…</string>
+    <string name="download_state_downloaded">Downloaded</string>
+    <string name="download_state_failed">Download failed</string>
+    <string name="download_retry">Retry</string>
+    <string name="download_cancelled">Download cancelled</string>
+    <string name="download_deleted">Download deleted</string>
+    <string name="download_cellular_title">Not on Wi-Fi</string>
+    <string name="download_cellular_message">You are not connected to Wi-Fi. The download will use mobile data.</string>
+    <string name="download_cellular_message_size">You are not connected to Wi-Fi. The download will use mobile data (≈ %1$s).</string>
+    <string name="download_size_small">&lt; 10 MB</string>
+    <string name="download_size_mb">%1$d MB</string>
+    <string name="favorites_tab_downloads">Downloaded</string>
+    <string name="favorites_downloads_empty">No downloads yet.\nDownload an episode to listen without internet.</string>
 </resources>

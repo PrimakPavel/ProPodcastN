@@ -104,15 +104,13 @@ class PlayerViewModelTest {
     }
 
     @Test
-    fun cycleSpeed_goesThroughAllSpeeds_andBackTo1x() = runTest {
+    fun setSpeed_goesToTheController() = runTest {
         controller.state.value = PlayerState(nowPlaying = episode.toNowPlaying())
         val vm = subscribed()
 
-        repeat(6) { vm.cycleSpeed() }
+        vm.setSpeed(1.75f)
 
-        assertEquals(
-            listOf("speed 1.25", "speed 1.5", "speed 1.75", "speed 2.0", "speed 0.75", "speed 1.0"),
-            controller.calls,
-        )
+        assertEquals(listOf("speed 1.75"), controller.calls)
+        assertEquals(1.75f, vm.uiState.value.playback.speed)
     }
 }

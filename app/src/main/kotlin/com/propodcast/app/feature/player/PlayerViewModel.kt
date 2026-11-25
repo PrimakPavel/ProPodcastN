@@ -9,7 +9,6 @@ import com.propodcast.app.core.player.PlayerController
 import com.propodcast.app.core.player.PlayerState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlin.math.abs
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -81,13 +80,7 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
-    /** 1× → 1.25× → 1.5× → 1.75× → 2× → 0.75× → 1×. */
-    fun cycleSpeed() {
-        val current = uiState.value.playback.speed
-        val index = SPEED_CYCLE.indexOfFirst { abs(it - current) < SPEED_EPSILON }
-        // An unknown speed (index -1) goes back to 1×.
-        controller.setSpeed(if (index < 0) 1f else SPEED_CYCLE[(index + 1) % SPEED_CYCLE.size])
-    }
+    fun setSpeed(speed: Float) = controller.setSpeed(speed)
 
     fun stop() = controller.stop()
 
@@ -97,7 +90,5 @@ class PlayerViewModel @Inject constructor(
 
     private companion object {
         const val STOP_TIMEOUT_MS = 5_000L
-        val SPEED_CYCLE = listOf(1f, 1.25f, 1.5f, 1.75f, 2f, 0.75f)
-        const val SPEED_EPSILON = 0.01f
     }
 }

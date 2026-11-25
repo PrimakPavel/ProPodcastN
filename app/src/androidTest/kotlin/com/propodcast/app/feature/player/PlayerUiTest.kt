@@ -50,7 +50,7 @@ class PlayerUiTest {
                 onSeekTo = { calls += "seekTo $it" },
                 onSeekBack = { calls += "back" },
                 onSeekForward = { calls += "forward" },
-                onCycleSpeed = { calls += "speed" },
+                onSpeedSelected = { calls += "speed $it" },
             )
         }
     }
@@ -99,9 +99,10 @@ class PlayerUiTest {
         composeRule.onNodeWithContentDescription("Play").performClick()
         composeRule.onNodeWithContentDescription("Forward 30 seconds").performClick()
         composeRule.onNodeWithContentDescription("Playback speed 1.5×").performClick()
+        composeRule.onNodeWithText("2×").performClick()
         composeRule.onNodeWithContentDescription("Collapse player").performClick()
 
-        assertEquals(listOf("back", "toggle", "forward", "speed", "collapse"), calls)
+        assertEquals(listOf("back", "toggle", "forward", "speed 2.0", "collapse"), calls)
     }
 
     @Test

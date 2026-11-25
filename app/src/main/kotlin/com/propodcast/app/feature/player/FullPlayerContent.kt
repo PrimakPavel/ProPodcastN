@@ -29,14 +29,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.propodcast.app.R
 import com.propodcast.app.core.commonwidgets.PodcastImage
+import com.propodcast.app.core.model.EpisodeDownloadState
 import com.propodcast.app.core.player.PlayerController
+import com.propodcast.app.feature.player.widgets.DownloadButton
 import com.propodcast.app.feature.player.widgets.PlayPauseButton
 import com.propodcast.app.feature.player.widgets.PlayerSeekBar
 import com.propodcast.app.feature.player.widgets.SkipButton
 import com.propodcast.app.feature.player.widgets.SpeedButton
 import com.propodcast.app.feature.player.widgets.playerSubtitle
 
-/** Stateless full player: artwork, titles, seek bar, -15 / play / +30 and speed. Also used by UI tests. */
+/** Stateless full player: artwork, titles, seek bar, -15 / play / +30, speed menu and download. Also used by UI tests. */
 @OptIn(ExperimentalMaterial3Api::class) // BottomSheetDefaults.DragHandle
 @Composable
 fun FullPlayerContent(
@@ -46,10 +48,13 @@ fun FullPlayerContent(
     onSeekTo: (Long) -> Unit,
     onSeekBack: () -> Unit,
     onSeekForward: () -> Unit,
-    onCycleSpeed: () -> Unit,
+    onSpeedSelected: (Float) -> Unit,
     modifier: Modifier = Modifier,
     /** Extra modifier for the artwork, e.g. a shared element transition from the mini player. */
     artworkModifier: Modifier = Modifier,
+    downloadState: EpisodeDownloadState? = null,
+    /** Download / cancel / delete / retry for the current [downloadState]; null hides the button. */
+    onDownloadClick: (() -> Unit)? = null,
 ) {
     val playback = state.playback
     val item = playback.nowPlaying ?: return
@@ -112,7 +117,13 @@ fun FullPlayerContent(
             SkipButton(seconds = (PlayerController.SEEK_FORWARD_MS / 1_000).toInt(), forward = true, onClick = onSeekForward)
         }
         Spacer(Modifier.height(16.dp))
-        SpeedButton(speed = playback.speed, onClick = onCycleSpeed)
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            SpeedButton(speed = playback.speed, onSpeedSelected = onSpeedSelected)
+            if (onDownloadClick != null) DownloadButton(state = downloadState, onClick = onDownloadClick)
+        }
         Spacer(Modifier.height(24.dp))
     }
 }

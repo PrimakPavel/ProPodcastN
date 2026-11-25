@@ -19,12 +19,14 @@ import com.propodcast.app.R
 import com.propodcast.app.core.commonwidgets.LoadingState
 import com.propodcast.app.core.model.Episode
 import com.propodcast.app.core.model.Podcast
+import com.propodcast.app.core.ui.EpisodeDownloadActions
+import com.propodcast.app.feature.favorites.widgets.DownloadsList
 import com.propodcast.app.feature.favorites.widgets.FavoriteEpisodesList
 import com.propodcast.app.feature.favorites.widgets.FavoritePodcastsList
 import com.propodcast.app.feature.favorites.widgets.FavoritesTabRow
 import kotlinx.coroutines.launch
 
-/** Stateless favorites content: Podcasts / Episodes tabs, rows removable by swipe or heart. Also used by UI tests. */
+/** Stateless favorites content: Podcasts / Episodes / Downloaded tabs, rows removable by swipe or heart. Also used by UI tests. */
 @Composable
 fun FavoritesContent(
     state: FavoritesUiState,
@@ -37,6 +39,7 @@ fun FavoritesContent(
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     initialTab: FavoritesTab = FavoritesTab.PODCASTS,
+    downloads: EpisodeDownloadActions = EpisodeDownloadActions(),
 ) {
     val pagerState = rememberPagerState(initialPage = initialTab.ordinal) { FavoritesTab.entries.size }
     val scope = rememberCoroutineScope()
@@ -55,6 +58,7 @@ fun FavoritesContent(
                 counts = mapOf(
                     FavoritesTab.PODCASTS to state.podcasts.size,
                     FavoritesTab.EPISODES to state.episodes.size,
+                    FavoritesTab.DOWNLOADS to state.downloads.size,
                 ),
                 onSelect = { tab -> scope.launch { pagerState.animateScrollToPage(tab.ordinal) } },
             )
@@ -76,6 +80,13 @@ fun FavoritesContent(
                             onEpisodeClick = onEpisodeClick,
                             onRemove = onRemoveEpisode,
                             onShare = onShareEpisode,
+                            downloads = downloads,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                        FavoritesTab.DOWNLOADS -> DownloadsList(
+                            downloads = state.downloads,
+                            actions = downloads,
+                            onEpisodeClick = onEpisodeClick,
                             modifier = Modifier.fillMaxSize(),
                         )
                     }
