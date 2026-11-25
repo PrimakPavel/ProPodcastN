@@ -24,22 +24,26 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.InputChipDefaults
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -49,11 +53,13 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import com.propodcast.app.R
+import com.propodcast.app.core.designsystem.component.FloatingHeader
 import com.propodcast.app.core.designsystem.component.ListFooterError
 import com.propodcast.app.core.designsystem.component.LoadingState
 import com.propodcast.app.core.designsystem.component.MessageState
 import com.propodcast.app.core.designsystem.component.PodcastListItem
 import com.propodcast.app.core.designsystem.component.QuotaBanner
+import com.propodcast.app.core.designsystem.component.rememberFloatingHeaderScrollBehavior
 import com.propodcast.app.core.model.ApiQuota
 import com.propodcast.app.core.model.Podcast
 import com.propodcast.app.core.ui.shareLink
@@ -122,7 +128,10 @@ fun HomeContent(
     onClearGenre: () -> Unit,
     onClearRegion: () -> Unit,
     modifier: Modifier = Modifier,
+    filtersPinned: Boolean = false,
 ) {
+    // Filter chips hide while scrolling down and come back on scroll up (pass filtersPinned = true to keep them).
+    val filtersScrollBehavior = rememberFloatingHeaderScrollBehavior(pinned = filtersPinned)
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -144,10 +153,13 @@ fun HomeContent(
         Column(
             Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
+                .padding(innerPadding)
+                .nestedScroll(filtersScrollBehavior.nestedScrollConnection),
         ) {
             QuotaBanner(quota)
-            ActiveFilters(filtersState, onOpenFilters, onClearGenre, onClearRegion)
+            FloatingHeader(filtersScrollBehavior, Modifier.testTag(FILTER_CHIPS_TAG)) {
+                ActiveFilters(filtersState, onOpenFilters, onClearGenre, onClearRegion)
+            }
             PodcastsList(podcasts, favoriteIds, onPodcastClick, onToggleFavorite, onShare)
         }
     }
@@ -163,18 +175,21 @@ private fun ActiveFilters(
     val genre = state.selectedGenre
     val region = state.selectedRegion
     if (genre == null && region == null) return
-    LazyRow(
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        if (genre != null) {
-            item(key = "genre") {
-                FilterChip(genre.name, onClick = { onOpenFilters(FiltersTab.GENRE) }, onClear = onClearGenre)
+    // Chips are 32dp tall; without the 48dp minimum touch-target padding they sit right under the app bar.
+    CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
+        LazyRow(
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            if (genre != null) {
+                item(key = "genre") {
+                    FilterChip(genre.name, onClick = { onOpenFilters(FiltersTab.GENRE) }, onClear = onClearGenre)
+                }
             }
-        }
-        if (region != null) {
-            item(key = "region") {
-                FilterChip(region.name, onClick = { onOpenFilters(FiltersTab.REGION) }, onClear = onClearRegion)
+            if (region != null) {
+                item(key = "region") {
+                    FilterChip(region.name, onClick = { onOpenFilters(FiltersTab.REGION) }, onClear = onClearRegion)
+                }
             }
         }
     }
@@ -265,3 +280,4 @@ private fun LazyGridScope.appendFooter(podcasts: LazyPagingItems<Podcast>) {
 }
 
 const val PODCASTS_LIST_TAG = "home:podcasts"
+const val FILTER_CHIPS_TAG = "home:filterChips"

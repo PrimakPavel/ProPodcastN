@@ -1,10 +1,15 @@
 package com.propodcast.app.feature.home
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeDown
+import androidx.compose.ui.test.swipeUp
 import androidx.paging.LoadState
 import androidx.paging.LoadStates
 import androidx.paging.PagingData
@@ -50,6 +55,7 @@ class HomeContentTest {
         onToggleFavorite: (Podcast) -> Unit = {},
         onOpenFilters: (FiltersTab) -> Unit = {},
         onClearGenre: () -> Unit = {},
+        filtersPinned: Boolean = false,
     ) {
         composeRule.setContent {
             ProPodcastTheme {
@@ -64,6 +70,7 @@ class HomeContentTest {
                     onOpenFilters = onOpenFilters,
                     onClearGenre = onClearGenre,
                     onClearRegion = {},
+                    filtersPinned = filtersPinned,
                 )
             }
         }
@@ -131,5 +138,38 @@ class HomeContentTest {
 
         assertEquals(FiltersTab.GENRE, opened)
         assertEquals(true, cleared)
+    }
+
+    private fun manyPodcasts() =
+        PagingData.from((1..40).map { podcast("$it", "Show $it") }, LoadStates(done, done, done))
+
+    private val comedyFilter = FiltersUiState(
+        genres = OptionsState.Loaded(listOf(Genre(133, "Comedy", 67))),
+        filters = PodcastFilters(genreId = 133),
+    )
+
+    @Test
+    fun filterChips_hideOnScrollDown_andShowOnScrollUp() {
+        setContent(data = manyPodcasts(), filters = comedyFilter)
+        composeRule.onNodeWithText("Comedy").assertIsDisplayed()
+
+        composeRule.onNodeWithTag(PODCASTS_LIST_TAG).performTouchInput { swipeUp() }
+        composeRule.onNodeWithText("Comedy").assertIsNotDisplayed()
+        composeRule.onNodeWithText("Show 1").assertIsNotDisplayed() // list really scrolled
+
+        composeRule.onNodeWithTag(PODCASTS_LIST_TAG).performTouchInput {
+            swipeDown(startY = centerY, endY = centerY + 300f)
+        }
+        composeRule.onNodeWithText("Comedy").assertIsDisplayed()
+        composeRule.onNodeWithText("Show 1").assertIsNotDisplayed() // header came back mid-list
+    }
+
+    @Test
+    fun pinnedFilterChips_stayOnScroll() {
+        setContent(data = manyPodcasts(), filters = comedyFilter, filtersPinned = true)
+
+        composeRule.onNodeWithTag(PODCASTS_LIST_TAG).performTouchInput { swipeUp() }
+
+        composeRule.onNodeWithText("Comedy").assertIsDisplayed()
     }
 }
