@@ -6,6 +6,7 @@ import com.propodcast.app.core.database.entity.toFavoriteEntity
 import com.propodcast.app.core.database.entity.toModel
 import com.propodcast.app.core.model.Episode
 import com.propodcast.app.core.model.Podcast
+import java.time.Clock
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
@@ -28,6 +29,7 @@ interface FavoritesRepository {
 class DefaultFavoritesRepository @Inject constructor(
     private val podcastDao: FavoritePodcastDao,
     private val episodeDao: FavoriteEpisodeDao,
+    private val clock: Clock,
 ) : FavoritesRepository {
 
     override val favoritePodcasts: Flow<List<Podcast>> =
@@ -42,7 +44,7 @@ class DefaultFavoritesRepository @Inject constructor(
 
     override suspend fun setPodcastFavorite(podcast: Podcast, favorite: Boolean) {
         if (favorite) {
-            podcastDao.upsert(podcast.toFavoriteEntity(addedAt = System.currentTimeMillis()))
+            podcastDao.upsert(podcast.toFavoriteEntity(addedAt = clock.millis()))
         } else {
             podcastDao.delete(podcast.id)
         }
@@ -50,7 +52,7 @@ class DefaultFavoritesRepository @Inject constructor(
 
     override suspend fun setEpisodeFavorite(episode: Episode, favorite: Boolean) {
         if (favorite) {
-            episodeDao.upsert(episode.toFavoriteEntity(addedAt = System.currentTimeMillis()))
+            episodeDao.upsert(episode.toFavoriteEntity(addedAt = clock.millis()))
         } else {
             episodeDao.delete(episode.id)
         }

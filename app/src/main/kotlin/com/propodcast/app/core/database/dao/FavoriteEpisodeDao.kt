@@ -8,7 +8,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface FavoriteEpisodeDao {
-    @Query("SELECT * FROM favorite_episodes ORDER BY added_at DESC")
+    /** Newest first; rowid breaks ties when two rows share added_at. */
+    @Query("SELECT * FROM favorite_episodes ORDER BY added_at DESC, rowid DESC")
     fun observeAll(): Flow<List<FavoriteEpisodeEntity>>
 
     @Query("SELECT id FROM favorite_episodes")

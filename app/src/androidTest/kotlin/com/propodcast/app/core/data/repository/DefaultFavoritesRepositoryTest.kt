@@ -8,6 +8,10 @@ import app.cash.turbine.test
 import com.propodcast.app.core.database.ProPodcastDatabase
 import com.propodcast.app.core.model.Episode
 import com.propodcast.app.core.model.Podcast
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZoneOffset
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -20,12 +24,13 @@ class DefaultFavoritesRepositoryTest {
 
     private lateinit var db: ProPodcastDatabase
     private lateinit var repository: DefaultFavoritesRepository
+    private val clock = TestClock(nowMs = 1_000)
 
     @Before
     fun setUp() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(context, ProPodcastDatabase::class.java).build()
-        repository = DefaultFavoritesRepository(db.favoritePodcastDao(), db.favoriteEpisodeDao())
+        repository = DefaultFavoritesRepository(db.favoritePodcastDao(), db.favoriteEpisodeDao(), clock)
     }
 
     @After
@@ -34,7 +39,7 @@ class DefaultFavoritesRepositoryTest {
     @Test
     fun podcasts_addNewestFirst_andRemove() = runTest {
         repository.setPodcastFavorite(podcast("p1"), favorite = true)
-        Thread.sleep(2) // distinct added_at
+        clock.nowMs += 1
         repository.setPodcastFavorite(podcast("p2"), favorite = true)
 
         repository.favoritePodcasts.test {
@@ -45,6 +50,34 @@ class DefaultFavoritesRepositoryTest {
         }
         repository.favoritePodcastIds.test {
             assertEquals(setOf("p1"), awaitItem())
+        }
+    }
+
+    @Test
+    fun addedAt_comesFromClock_andTiesKeepInsertOrder() = runTest {
+        // Same millisecond: rowid keeps "last added first".
+        repository.setPodcastFavorite(podcast("p1"), favorite = true)
+        repository.setPodcastFavorite(podcast("p2"), favorite = true)
+        repository.setPodcastFavorite(podcast("p3"), favorite = true)
+
+        repository.favoritePodcasts.test {
+            assertEquals(listOf("p3", "p2", "p1"), awaitItem().map { it.id })
+        }
+        assertEquals(listOf(1_000L), db.query("SELECT DISTINCT added_at FROM favorite_podcasts", null).use { c ->
+            buildList { while (c.moveToNext()) add(c.getLong(0)) }
+        })
+    }
+
+    @Test
+    fun refavoriting_movesItemToTop() = runTest {
+        repository.setEpisodeFavorite(episode("e1"), favorite = true)
+        clock.nowMs += 1
+        repository.setEpisodeFavorite(episode("e2"), favorite = true)
+        clock.nowMs += 1
+        repository.setEpisodeFavorite(episode("e1"), favorite = true)
+
+        repository.favoriteEpisodes.test {
+            assertEquals(listOf("e1", "e2"), awaitItem().map { it.id })
         }
     }
 
@@ -87,4 +120,11 @@ class DefaultFavoritesRepositoryTest {
         podcastId = "p1",
         podcastTitle = "Podcast p1",
     )
+
+    /** Clock whose time the test sets explicitly. */
+    private class TestClock(var nowMs: Long) : Clock() {
+        override fun getZone(): ZoneId = ZoneOffset.UTC
+        override fun withZone(zone: ZoneId): Clock = this
+        override fun instant(): Instant = Instant.ofEpochMilli(nowMs)
+    }
 }
