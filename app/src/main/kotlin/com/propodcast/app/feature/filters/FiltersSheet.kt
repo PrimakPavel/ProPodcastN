@@ -17,11 +17,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.propodcast.app.R
 import com.propodcast.app.core.commonwidgets.OptionsList
+import com.propodcast.app.core.commonwidgets.SheetHeader
+import com.propodcast.app.core.commonwidgets.rememberSheetCloser
 import com.propodcast.app.feature.filters.widgets.genreOptions
 import com.propodcast.app.feature.filters.widgets.regionOptions
 
-/** Bottom sheet with Genre / Region tabs. A selection is applied right away; swipe down to close. */
+/** Bottom sheet with Genre / Region tabs. A selection is applied right away; close with ✕ or a swipe down. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FiltersSheet(
@@ -34,11 +37,14 @@ fun FiltersSheet(
     initialTab: FiltersTab = FiltersTab.GENRE,
 ) {
     var selectedTab by rememberSaveable { mutableIntStateOf(initialTab.ordinal) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val close = rememberSheetCloser(sheetState, onDismiss)
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        sheetState = sheetState,
     ) {
         Column {
+            SheetHeader(title = stringResource(R.string.filters_title), onClose = close)
             PrimaryTabRow(selectedTabIndex = selectedTab) {
                 FiltersTab.entries.forEach { tab ->
                     Tab(
