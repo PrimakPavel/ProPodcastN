@@ -54,7 +54,7 @@ class PagingSourcesTest {
 
         val error = pager.refresh() as LoadResult.Error
 
-        assertEquals(AppError.QuotaExceeded, (error.throwable as AppException).error)
+        assertEquals(AppError.TooManyRequests, (error.throwable as AppException).error)
     }
 
     @Test

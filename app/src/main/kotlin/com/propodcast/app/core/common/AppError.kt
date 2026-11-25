@@ -5,18 +5,27 @@ import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.serialization.SerializationException
 import retrofit2.HttpException
 
-/** Errors the UI knows how to explain to the user. */
+/**
+ * Errors the UI knows how to explain to the user.
+ * HTTP codes follow the Listen Notes API v2 docs (400, 401, 404, 429, 5xx).
+ */
 sealed interface AppError {
-    /** 401: missing or wrong Listen Notes API key. */
+    /** 401: wrong API key, or the Listen Notes account is suspended. */
     data object Unauthorized : AppError
 
-    /** 404: the podcast / episode no longer exists. */
+    /** 404: the podcast / episode does not exist. */
     data object NotFound : AppError
 
-    /** 429: free plan quota exceeded. */
-    data object QuotaExceeded : AppError
+    /**
+     * 429: either the FREE plan monthly quota is used up, or requests are sent too fast
+     * (rate limit, any plan). The API does not say which; retrying later may help.
+     */
+    data object TooManyRequests : AppError
 
-    /** 5xx or any other unexpected HTTP status. */
+    /** Other 4xx (e.g. 400: missing or invalid parameters): a problem with our request. */
+    data class Client(val code: Int) : AppError
+
+    /** 5xx: unexpected error on the Listen Notes side. */
     data class Server(val code: Int) : AppError
 
     /** No connection, timeout, DNS, etc. */
@@ -31,11 +40,13 @@ class AppException(val error: AppError, cause: Throwable? = null) : Exception(er
 
 fun Throwable.toAppError(): AppError = when (this) {
     is AppException -> error
-    is HttpException -> when (code()) {
+    is HttpException -> when (val code = code()) {
         401 -> AppError.Unauthorized
         404 -> AppError.NotFound
-        429 -> AppError.QuotaExceeded
-        else -> AppError.Server(code())
+        429 -> AppError.TooManyRequests
+        in 500..599 -> AppError.Server(code)
+        in 400..499 -> AppError.Client(code)
+        else -> AppError.Unknown(this)
     }
     is IOException -> AppError.Network
     is SerializationException -> AppError.Unknown(this)

@@ -12,9 +12,12 @@ class AppErrorTest {
     @Test
     fun httpCodes_mapToAppErrors() = runTest {
         val expected = mapOf(
+            400 to AppError.Client(400),
             401 to AppError.Unauthorized,
+            403 to AppError.Client(403),
             404 to AppError.NotFound,
-            429 to AppError.QuotaExceeded,
+            429 to AppError.TooManyRequests,
+            500 to AppError.Server(500),
             503 to AppError.Server(503),
         )
         ListenNotesTestServer().use { server ->

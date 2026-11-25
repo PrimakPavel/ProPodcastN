@@ -1,7 +1,9 @@
 package com.propodcast.app.core.di
 
 import com.propodcast.app.BuildConfig
+import com.propodcast.app.core.data.repository.InMemoryApiQuotaRepository
 import com.propodcast.app.core.network.ApiKeyInterceptor
+import com.propodcast.app.core.network.ApiQuotaInterceptor
 import com.propodcast.app.core.network.ListenNotesApi
 import dagger.Module
 import dagger.Provides
@@ -30,10 +32,14 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(config: ApiConfig): OkHttpClient = OkHttpClient.Builder()
+    fun provideOkHttpClient(
+        config: ApiConfig,
+        quotaRepository: InMemoryApiQuotaRepository,
+    ): OkHttpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .addInterceptor(ApiKeyInterceptor(config.apiKey))
+        .addInterceptor(ApiQuotaInterceptor(quotaRepository::update))
         .apply {
             if (BuildConfig.DEBUG) {
                 addInterceptor(

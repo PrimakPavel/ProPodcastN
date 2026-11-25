@@ -120,6 +120,7 @@ com.propodcast.app
 - Юніт-тести: мапери, PagingSource (MockWebServer), репозиторії.
 
 **Етап 2. Головна + фільтри**
+- Попередження про квоту API: `ApiQuotaRepository.quota` (з заголовків `X-ListenAPI-Usage` / `X-ListenAPI-FreeQuota`), банер при `isRunningLow()` / `isExhausted`.
 - Список best podcasts з Paging 3, стани loading / error + retry / empty.
 - Фільтри Жанр/Регіон (bottom sheet з вкладками або окремий екран), збереження в DataStore, перезавантаження списку при зміні.
 - Дії на картці: в обране, поділитися (`Intent.ACTION_SEND` з `listennotes_url`).

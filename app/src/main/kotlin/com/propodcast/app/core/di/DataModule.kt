@@ -1,9 +1,11 @@
 package com.propodcast.app.core.di
 
+import com.propodcast.app.core.data.repository.ApiQuotaRepository
 import com.propodcast.app.core.data.repository.DataStoreUserPreferencesRepository
 import com.propodcast.app.core.data.repository.DefaultFavoritesRepository
 import com.propodcast.app.core.data.repository.DefaultPodcastRepository
 import com.propodcast.app.core.data.repository.FavoritesRepository
+import com.propodcast.app.core.data.repository.InMemoryApiQuotaRepository
 import com.propodcast.app.core.data.repository.PodcastRepository
 import com.propodcast.app.core.data.repository.UserPreferencesRepository
 import dagger.Binds
@@ -22,4 +24,7 @@ abstract class DataModule {
 
     @Binds
     abstract fun bindUserPreferencesRepository(impl: DataStoreUserPreferencesRepository): UserPreferencesRepository
+
+    @Binds
+    abstract fun bindApiQuotaRepository(impl: InMemoryApiQuotaRepository): ApiQuotaRepository
 }

@@ -5,7 +5,7 @@ import androidx.paging.PagingState
 import com.propodcast.app.core.common.apiCall
 import com.propodcast.app.core.model.Podcast
 import com.propodcast.app.core.network.ListenNotesApi
-import com.propodcast.app.core.network.mapper.toModel
+import com.propodcast.app.core.network.model.toModel
 
 /** `best_podcasts` is paged by page number (1-based), using `has_next` / `next_page_number`. */
 class BestPodcastsPagingSource(

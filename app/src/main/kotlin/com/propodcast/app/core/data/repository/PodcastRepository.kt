@@ -11,9 +11,10 @@ import com.propodcast.app.core.model.Podcast
 import com.propodcast.app.core.model.PodcastDetails
 import com.propodcast.app.core.model.Region
 import com.propodcast.app.core.network.ListenNotesApi
-import com.propodcast.app.core.network.mapper.ANY_LANGUAGE
-import com.propodcast.app.core.network.mapper.toModel
-import com.propodcast.app.core.network.mapper.toModels
+import com.propodcast.app.core.network.ListenNotesApi.Companion.ANY_LANGUAGE
+import com.propodcast.app.core.network.model.toDetails
+import com.propodcast.app.core.network.model.toModel
+import com.propodcast.app.core.network.model.toModels
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
@@ -47,7 +48,7 @@ class DefaultPodcastRepository @Inject constructor(
         }.flow
 
     override suspend fun podcastDetails(id: String, nextEpisodePubDate: Long?): Result<PodcastDetails> =
-        apiCall { api.podcast(id = id, nextEpisodePubDate = nextEpisodePubDate).toModel() }
+        apiCall { api.podcast(id = id, nextEpisodePubDate = nextEpisodePubDate).toDetails() }
 
     override suspend fun recommendations(id: String): Result<List<Podcast>> =
         apiCall { api.recommendations(id).recommendations.map { it.toModel() } }
@@ -56,7 +57,7 @@ class DefaultPodcastRepository @Inject constructor(
         apiCall { api.genres().genres.map { it.toModel() }.sortedBy { it.name } }
 
     override suspend fun regions(): Result<List<Region>> =
-        apiCall { api.regions().toModels() }
+        apiCall { api.regions().toModels().sortedBy { it.name } }
 
     override suspend fun languages(): Result<List<String>> =
         apiCall { api.languages().languages.filterNot { it == ANY_LANGUAGE } }

@@ -3,7 +3,7 @@ package com.propodcast.app.core.network
 import com.propodcast.app.core.network.model.BestPodcastsResponse
 import com.propodcast.app.core.network.model.GenresResponse
 import com.propodcast.app.core.network.model.LanguagesResponse
-import com.propodcast.app.core.network.model.PodcastDetailsResponse
+import com.propodcast.app.core.network.model.NetworkPodcast
 import com.propodcast.app.core.network.model.RecommendationsResponse
 import com.propodcast.app.core.network.model.RegionsResponse
 import com.propodcast.app.core.network.model.SearchPodcastsResponse
@@ -35,7 +35,7 @@ interface ListenNotesApi {
         @Path("id") id: String,
         @Query("next_episode_pub_date") nextEpisodePubDate: Long? = null,
         @Query("sort") sort: String = SORT_RECENT_FIRST,
-    ): PodcastDetailsResponse
+    ): NetworkPodcast
 
     @GET("podcasts/{id}/recommendations")
     suspend fun recommendations(@Path("id") id: String): RecommendationsResponse
@@ -51,5 +51,8 @@ interface ListenNotesApi {
     companion object {
         const val SORT_RECENT_FIRST = "recent_first"
         const val TYPE_PODCAST = "podcast"
+
+        /** The "no language filter" entry returned by `GET languages`. */
+        const val ANY_LANGUAGE = "Any language"
     }
 }
