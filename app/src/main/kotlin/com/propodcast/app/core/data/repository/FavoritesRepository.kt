@@ -6,6 +6,7 @@ import com.propodcast.app.core.database.entity.toFavoriteEntity
 import com.propodcast.app.core.database.entity.toModel
 import com.propodcast.app.core.model.Episode
 import com.propodcast.app.core.model.Podcast
+import com.propodcast.app.core.model.RemovedFavorite
 import java.time.Clock
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -23,6 +24,13 @@ interface FavoritesRepository {
 
     suspend fun setPodcastFavorite(podcast: Podcast, favorite: Boolean)
     suspend fun setEpisodeFavorite(episode: Episode, favorite: Boolean)
+
+    /** Removes a favorite and returns it for [restore]; null when it was not a favorite. */
+    suspend fun removePodcast(id: String): RemovedFavorite.PodcastItem?
+    suspend fun removeEpisode(id: String): RemovedFavorite.EpisodeItem?
+
+    /** Puts a removed favorite back with its original date, so it returns to the same position. */
+    suspend fun restore(removed: RemovedFavorite)
 }
 
 @Singleton
@@ -55,6 +63,19 @@ class DefaultFavoritesRepository @Inject constructor(
             episodeDao.upsert(episode.toFavoriteEntity(addedAt = clock.millis()))
         } else {
             episodeDao.delete(episode.id)
+        }
+    }
+
+    override suspend fun removePodcast(id: String): RemovedFavorite.PodcastItem? =
+        podcastDao.remove(id)?.let { RemovedFavorite.PodcastItem(it.toModel(), it.addedAt) }
+
+    override suspend fun removeEpisode(id: String): RemovedFavorite.EpisodeItem? =
+        episodeDao.remove(id)?.let { RemovedFavorite.EpisodeItem(it.toModel(), it.addedAt) }
+
+    override suspend fun restore(removed: RemovedFavorite) {
+        when (removed) {
+            is RemovedFavorite.PodcastItem -> podcastDao.upsert(removed.podcast.toFavoriteEntity(removed.addedAtMs))
+            is RemovedFavorite.EpisodeItem -> episodeDao.upsert(removed.episode.toFavoriteEntity(removed.addedAtMs))
         }
     }
 }

@@ -69,6 +69,33 @@ class DefaultFavoritesRepositoryTest {
     }
 
     @Test
+    fun remove_thenRestore_keepsOriginalPosition() = runTest {
+        repository.setPodcastFavorite(podcast("p1"), favorite = true)
+        clock.nowMs += 1
+        repository.setPodcastFavorite(podcast("p2"), favorite = true)
+        clock.nowMs += 1
+        repository.setPodcastFavorite(podcast("p3"), favorite = true)
+
+        val removed = repository.removePodcast("p2")!!
+        assertEquals(1_001L, removed.addedAtMs)
+        assertEquals(null, repository.removePodcast("p2"))
+
+        clock.nowMs += 10 // restore must not take a new date
+        repository.restore(removed)
+        repository.favoritePodcasts.test {
+            assertEquals(listOf("p3", "p2", "p1"), awaitItem().map { it.id })
+        }
+
+        repository.setEpisodeFavorite(episode("e1"), favorite = true)
+        val removedEpisode = repository.removeEpisode("e1")!!
+        repository.favoriteEpisodes.test {
+            assertEquals(emptyList<Episode>(), awaitItem())
+            repository.restore(removedEpisode)
+            assertEquals(listOf(episode("e1")), awaitItem())
+        }
+    }
+
+    @Test
     fun refavoriting_movesItemToTop() = runTest {
         repository.setEpisodeFavorite(episode("e1"), favorite = true)
         clock.nowMs += 1

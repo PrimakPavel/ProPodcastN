@@ -23,7 +23,9 @@ fun AppNavHost(
         composable<HomeRoute> {
             HomeScreen(onPodcastClick = { navController.navigate(PodcastDetailsRoute(it.id)) })
         }
-        composable<FavoritesRoute> { FavoritesScreen() }
+        composable<FavoritesRoute> {
+            FavoritesScreen(onPodcastClick = { navController.navigate(PodcastDetailsRoute(it.id)) })
+        }
         composable<SearchRoute> {
             SearchScreen(onPodcastClick = { navController.navigate(PodcastDetailsRoute(it.id)) })
         }

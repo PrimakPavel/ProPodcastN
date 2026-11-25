@@ -3,7 +3,6 @@
     <string name="best_podcasts_title">Best podcasts</string>
     <string name="favorites_title">Favorites</string>
     <string name="search_title">Search</string>
-    <string name="coming_soon">Coming soon</string>
     <string name="podcast_details_title">Podcast</string>
 
     <!-- Common actions -->
@@ -68,4 +67,12 @@
     <string name="search_language_any">Any language</string>
     <string name="search_language_title">Search language</string>
     <string name="action_clear_search">Clear search</string>
+
+    <!-- Favorites -->
+    <string name="favorites_tab_podcasts">Podcasts</string>
+    <string name="favorites_tab_episodes">Episodes</string>
+    <string name="favorites_podcasts_empty">No favorite podcasts yet.\nTap ♡ on a podcast to keep it here.</string>
+    <string name="favorites_episodes_empty">No favorite episodes yet.\nTap ♡ on an episode in podcast details to keep it here.</string>
+    <string name="favorite_removed">Removed “%1$s”</string>
+    <string name="action_undo">Undo</string>
 </resources>
