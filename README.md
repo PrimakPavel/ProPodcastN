@@ -59,6 +59,15 @@ keep favorites, download episodes for offline listening and play them in the bac
 - Firebase Crashlytics and Analytics (only when `google-services.json` is present).
 - Debug builds talk to the Listen Notes mock server, so no API key is needed to run the app.
 
+## Demo
+
+| Phone | Tablet |
+|:---:|:---:|
+| <img src="docs/screenshots/phone_demo.gif" width="270" alt="Phone demo: list, details, player, favorites"> | <img src="docs/screenshots/tablet_demo.gif" width="560" alt="Tablet demo: grid, two-pane details, landscape player, favorites"> |
+
+Best podcasts → podcast details (artwork transition) → play an episode → full-screen player → Favorites.
+On the tablet the same flow uses the navigation rail, the grid, two-pane details and the landscape player.
+
 ## Screenshots
 
 ### Phone
