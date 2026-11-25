@@ -40,10 +40,12 @@ class DefaultPodcastRepository @Inject constructor(
 ) : PodcastRepository {
 
     override fun bestPodcasts(genreId: Int?, region: String?): Flow<PagingData<Podcast>> =
-        Pager(pagingConfig()) { BestPodcastsPagingSource(api, genreId, region) }.flow
+        Pager(pagingConfig(BestPodcastsPagingSource.PAGE_SIZE)) {
+            BestPodcastsPagingSource(api, genreId, region)
+        }.flow
 
     override fun searchPodcasts(query: String, language: String?): Flow<PagingData<Podcast>> =
-        Pager(pagingConfig()) {
+        Pager(pagingConfig(SearchPodcastsPagingSource.PAGE_SIZE)) {
             SearchPodcastsPagingSource(api, query, language?.takeUnless { it == ANY_LANGUAGE })
         }.flow
 
@@ -62,15 +64,11 @@ class DefaultPodcastRepository @Inject constructor(
     override suspend fun languages(): Result<List<String>> =
         apiCall { api.languages().languages.filterNot { it == ANY_LANGUAGE } }
 
-    private fun pagingConfig() = PagingConfig(
-        pageSize = PAGE_SIZE,
-        initialLoadSize = PAGE_SIZE,
-        prefetchDistance = PAGE_SIZE / 2,
+    /** Page size matches what the API returns per request; Paging only uses it for prefetching. */
+    private fun pagingConfig(pageSize: Int) = PagingConfig(
+        pageSize = pageSize,
+        initialLoadSize = pageSize,
+        prefetchDistance = pageSize / 2,
         enablePlaceholders = false,
     )
-
-    private companion object {
-        // Listen Notes returns 20 best podcasts / 10 search results per request; the source decides the real size.
-        const val PAGE_SIZE = 20
-    }
 }
