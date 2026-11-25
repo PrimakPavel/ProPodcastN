@@ -36,7 +36,7 @@ fun NetworkStatusBar(banner: NetworkBanner, modifier: Modifier = Modifier) {
     var shown by remember { mutableStateOf(NetworkBanner.OFFLINE) }
     if (banner != NetworkBanner.HIDDEN) shown = banner
     val color by animateColorAsState(
-        targetValue = if (shown == NetworkBanner.OFFLINE) MaterialTheme.colorScheme.error else BACK_ONLINE_GREEN,
+        targetValue = if (shown == NetworkBanner.OFFLINE) OFFLINE_RED else BACK_ONLINE_GREEN,
         label = "networkBarColor",
     )
     AnimatedVisibility(
@@ -59,7 +59,7 @@ fun NetworkStatusBar(banner: NetworkBanner, modifier: Modifier = Modifier) {
                     if (shown == NetworkBanner.OFFLINE) R.string.network_offline else R.string.network_back_online,
                 ),
                 style = MaterialTheme.typography.labelSmall,
-                color = if (shown == NetworkBanner.OFFLINE) MaterialTheme.colorScheme.onError else Color.White,
+                color = Color.White,
             )
         }
     }
@@ -67,4 +67,6 @@ fun NetworkStatusBar(banner: NetworkBanner, modifier: Modifier = Modifier) {
 
 const val NETWORK_STATUS_BAR_TAG = "network_status_bar"
 
+// Fixed colours, the same in light and dark theme (the theme's error colour turns pale pink in dark mode).
+private val OFFLINE_RED = Color(0xFFC62828)
 private val BACK_ONLINE_GREEN = Color(0xFF2E7D32)

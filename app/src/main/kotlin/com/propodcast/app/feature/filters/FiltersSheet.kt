@@ -15,6 +15,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.propodcast.app.R
@@ -45,7 +46,8 @@ fun FiltersSheet(
     ) {
         Column {
             SheetHeader(title = stringResource(R.string.filters_title), onClose = close)
-            PrimaryTabRow(selectedTabIndex = selectedTab) {
+            // Transparent, so the tabs sit on the sheet's own colour instead of a band of `surface`.
+            PrimaryTabRow(selectedTabIndex = selectedTab, containerColor = Color.Transparent) {
                 FiltersTab.entries.forEach { tab ->
                     Tab(
                         selected = selectedTab == tab.ordinal,
