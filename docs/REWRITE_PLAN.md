@@ -109,6 +109,7 @@ com.propodcast.app
 - `@HiltAndroidApp` Application, `@AndroidEntryPoint` MainActivity.
 - Тема (кольори/типографіка), `NavigationSuiteScaffold` з 3 вкладками-заглушками: Головна, Обране, Пошук.
 - Base URL і ключ через `BuildConfig`: debug → мок-сервер без ключа, release → продакшн-API з `LISTEN_NOTES_API_KEY` з `local.properties`.
+  - Перемикач `LISTEN_NOTES_USE_PRODUCTION=true` у `local.properties` переводить і debug на продакшн-API з тим самим ключем (без ключа збірка падає з підказкою). У логах OkHttp заголовок ключа приховано.
 
 **Етап 1. Шар даних** ✅
 - OkHttp зафіксовано на 5.4.0: 5.5.x вимагає compileSdk 37 (на машині лише SDK 36).
@@ -118,6 +119,7 @@ com.propodcast.app
 - Room: `FavoritePodcastEntity`, `FavoriteEpisodeEntity` (+ `podcastTitle`, `addedAt` для сортування), DAO на Flow.
 - DataStore: фільтри (жанр, регіон, мова), останній трек (url, назва, автор, обкладинка, позиція).
 - Юніт-тести: мапери, PagingSource (MockWebServer), репозиторії.
+- Жанри, регіони й мови кешуються в окремому DataStore (`reference_cache`) на 7 днів: старий кеш віддається, якщо мережа недоступна; записи прив'язані до base URL, тож мок і продакшн не змішуються. Економить 2–3 запити квоти на кожному запуску.
 
 **Етап 2. Головна + фільтри** ✅
 - Coil зафіксовано на 3.4.0: 3.6.x тягне Compose 1.12, якому потрібен compileSdk 37.

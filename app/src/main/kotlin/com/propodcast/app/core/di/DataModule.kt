@@ -1,5 +1,7 @@
 package com.propodcast.app.core.di
 
+import com.propodcast.app.core.data.cache.DataStoreReferenceDataCache
+import com.propodcast.app.core.data.cache.ReferenceDataCache
 import com.propodcast.app.core.data.repository.ApiQuotaRepository
 import com.propodcast.app.core.data.repository.DataStoreUserPreferencesRepository
 import com.propodcast.app.core.data.repository.DefaultFavoritesRepository
@@ -27,4 +29,7 @@ abstract class DataModule {
 
     @Binds
     abstract fun bindApiQuotaRepository(impl: InMemoryApiQuotaRepository): ApiQuotaRepository
+
+    @Binds
+    abstract fun bindReferenceDataCache(impl: DataStoreReferenceDataCache): ReferenceDataCache
 }

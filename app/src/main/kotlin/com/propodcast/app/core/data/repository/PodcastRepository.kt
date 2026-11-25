@@ -4,6 +4,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.propodcast.app.core.common.apiCall
+import com.propodcast.app.core.data.cache.ReferenceDataCache
 import com.propodcast.app.core.data.paging.BestPodcastsPagingSource
 import com.propodcast.app.core.data.paging.SearchPodcastsPagingSource
 import com.propodcast.app.core.model.Genre
@@ -18,6 +19,8 @@ import com.propodcast.app.core.network.dto.toModel
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
 
 /** Remote podcast data. Failures come back as [Result.failure] with an AppException. */
 interface PodcastRepository {
@@ -37,6 +40,7 @@ interface PodcastRepository {
 @Singleton
 class DefaultPodcastRepository @Inject constructor(
     private val api: ListenNotesApi,
+    private val cache: ReferenceDataCache,
 ) : PodcastRepository {
 
     override fun bestPodcasts(genreId: Int?, region: String?): Flow<PagingData<Podcast>> =
@@ -55,14 +59,21 @@ class DefaultPodcastRepository @Inject constructor(
     override suspend fun recommendations(id: String): Result<List<Podcast>> =
         apiCall { api.recommendations(id).recommendations.map { it.toModel() } }
 
+    // Genres, regions and languages rarely change: cached on disk, refreshed weekly.
     override suspend fun genres(): Result<List<Genre>> =
-        apiCall { api.genres().genres.map { it.toModel() }.sortedBy { it.name } }
+        cache.getOrFetch(CACHE_KEY_GENRES, ListSerializer(Genre.serializer())) {
+            apiCall { api.genres().genres.map { it.toModel() }.sortedBy { it.name } }
+        }
 
     override suspend fun regions(): Result<List<Region>> =
-        apiCall { api.regions().toModels().sortedBy { it.name } }
+        cache.getOrFetch(CACHE_KEY_REGIONS, ListSerializer(Region.serializer())) {
+            apiCall { api.regions().toModels().sortedBy { it.name } }
+        }
 
     override suspend fun languages(): Result<List<String>> =
-        apiCall { api.languages().languages.filterNot { it == ANY_LANGUAGE } }
+        cache.getOrFetch(CACHE_KEY_LANGUAGES, ListSerializer(String.serializer())) {
+            apiCall { api.languages().languages.filterNot { it == ANY_LANGUAGE } }
+        }
 
     /** Page size matches what the API returns per request; Paging only uses it for prefetching. */
     private fun pagingConfig(pageSize: Int) = PagingConfig(
@@ -71,4 +82,10 @@ class DefaultPodcastRepository @Inject constructor(
         prefetchDistance = pageSize / 2,
         enablePlaceholders = false,
     )
+
+    private companion object {
+        const val CACHE_KEY_GENRES = "genres"
+        const val CACHE_KEY_REGIONS = "regions"
+        const val CACHE_KEY_LANGUAGES = "languages"
+    }
 }
