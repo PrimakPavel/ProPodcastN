@@ -63,7 +63,7 @@ Koin 1.0, RxJava2, LiveData + Paging 2, Kotlin synthetics, Otto, Picasso, Stetho
 | AppWidget + RemoteViews | Glance App Widget |
 | Timber | Timber (лишаємо) |
 | Stetho | прибираємо (App Inspection у Studio) |
-| Firebase / Fabric | відкладено до етапу 8 |
+| Firebase / Fabric | не переносимо (рішення 2026-11-25) |
 
 ---
 
@@ -177,7 +177,7 @@ com.propodcast.app
 **Етап 8. Полірування**
 - Адаптивні сітки для планшетів/landscape, edge-to-edge, темна тема, accessibility (contentDescription).
 - Compose UI-тести ключових екранів, R8-правила, release-підпис (новий keystore поза git).
-- Рішення щодо Firebase (Analytics / Crashlytics / FCM) — відкладено до цього етапу.
+- Firebase (Analytics / Crashlytics / FCM) не робимо: для цього застосунку зайве.
 
 ---
 
@@ -185,7 +185,7 @@ com.propodcast.app
 Otto, RxJava, Stetho, Multidex, `AppExecutors`, `ServerMocksUtil` (мови беремо з API), Fabric Crashlytics, ручні `MediaSessionHelper` / `AudioFocusHelper` / `MediaSessionNotificationsManager` / `UpdateByTimerHandler` (замінює Media3), старий `keystore.jks` і `google-services.json`.
 
 ## 6. Рішення (2026-11-25)
-1. **Firebase** — відкладено; повертаємось до питання на етапі 8.
+1. **Firebase** — не робимо (вирішено 2026-11-25).
 2. **API** — починаємо з мок-сервера `https://listen-api-test.listennotes.com/api/v2/` (без ключа) для debug. Справжній ключ пізніше: `LISTEN_NOTES_API_KEY` у `local.properties`, release ходить на продакшн-API.
 3. **Пошук** — лише подкасти, як у старому застосунку. Пошук епізодів — можлива окрема задача пізніше.
 4. **Офлайн-кеш** — не робимо.
