@@ -1,11 +1,13 @@
-package com.propodcast.app.core.network.model
+package com.propodcast.app.core.network.dto
 
+import com.propodcast.app.core.network.dto.response.RegionsResponse
+import com.propodcast.app.core.network.dto.response.toModels
 import com.propodcast.app.core.testing.testJson
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
-class NetworkModelMappingTest {
+class NetworkDtoMappingTest {
 
     @Test
     fun podcast_blankStringsBecomeNull() {

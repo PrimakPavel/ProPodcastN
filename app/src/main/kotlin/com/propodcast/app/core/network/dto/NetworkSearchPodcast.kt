@@ -1,4 +1,4 @@
-package com.propodcast.app.core.network.model
+package com.propodcast.app.core.network.dto
 
 import com.propodcast.app.core.model.Podcast
 import kotlinx.serialization.SerialName
@@ -21,8 +21,8 @@ data class NetworkSearchPodcast(
 )
 
 fun NetworkSearchPodcast.toModel(): Podcast {
-    val image = image.nullIfBlank()
-    val thumbnail = thumbnail.nullIfBlank()
+    val image = image?.ifBlank { null }
+    val thumbnail = thumbnail?.ifBlank { null }
     return Podcast(
         id = id,
         title = title,
@@ -31,7 +31,7 @@ fun NetworkSearchPodcast.toModel(): Podcast {
         thumbnailUrl = thumbnail ?: image,
         description = description,
         totalEpisodes = totalEpisodes,
-        listennotesUrl = listennotesUrl.nullIfBlank(),
+        listennotesUrl = listennotesUrl?.ifBlank { null },
         latestPubDateMs = latestPubDateMs,
         genreIds = genreIds,
         explicitContent = explicitContent,

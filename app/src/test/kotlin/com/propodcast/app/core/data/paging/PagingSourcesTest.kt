@@ -6,10 +6,10 @@ import androidx.paging.testing.TestPager
 import com.propodcast.app.core.common.AppError
 import com.propodcast.app.core.common.AppException
 import com.propodcast.app.core.model.Podcast
-import com.propodcast.app.core.network.model.BestPodcastsResponse
-import com.propodcast.app.core.network.model.NetworkPodcast
-import com.propodcast.app.core.network.model.NetworkSearchPodcast
-import com.propodcast.app.core.network.model.SearchPodcastsResponse
+import com.propodcast.app.core.network.dto.NetworkPodcast
+import com.propodcast.app.core.network.dto.NetworkSearchPodcast
+import com.propodcast.app.core.network.dto.response.BestPodcastsResponse
+import com.propodcast.app.core.network.dto.response.SearchPodcastsResponse
 import com.propodcast.app.core.testing.ListenNotesTestServer
 import com.propodcast.app.core.testing.fixture
 import com.propodcast.app.core.testing.testJson

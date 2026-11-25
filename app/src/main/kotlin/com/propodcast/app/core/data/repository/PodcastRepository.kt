@@ -12,9 +12,9 @@ import com.propodcast.app.core.model.PodcastDetails
 import com.propodcast.app.core.model.Region
 import com.propodcast.app.core.network.ListenNotesApi
 import com.propodcast.app.core.network.ListenNotesApi.Companion.ANY_LANGUAGE
-import com.propodcast.app.core.network.model.toDetails
-import com.propodcast.app.core.network.model.toModel
-import com.propodcast.app.core.network.model.toModels
+import com.propodcast.app.core.network.dto.response.toModels
+import com.propodcast.app.core.network.dto.toDetails
+import com.propodcast.app.core.network.dto.toModel
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow

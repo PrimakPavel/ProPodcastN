@@ -1,4 +1,4 @@
-package com.propodcast.app.core.network.model
+package com.propodcast.app.core.network.dto.response
 
 import kotlinx.serialization.Serializable
 

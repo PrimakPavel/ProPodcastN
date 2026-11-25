@@ -1,12 +1,12 @@
 package com.propodcast.app.core.network
 
-import com.propodcast.app.core.network.model.BestPodcastsResponse
-import com.propodcast.app.core.network.model.GenresResponse
-import com.propodcast.app.core.network.model.LanguagesResponse
-import com.propodcast.app.core.network.model.NetworkPodcast
-import com.propodcast.app.core.network.model.RecommendationsResponse
-import com.propodcast.app.core.network.model.RegionsResponse
-import com.propodcast.app.core.network.model.SearchPodcastsResponse
+import com.propodcast.app.core.network.dto.NetworkPodcast
+import com.propodcast.app.core.network.dto.response.BestPodcastsResponse
+import com.propodcast.app.core.network.dto.response.GenresResponse
+import com.propodcast.app.core.network.dto.response.LanguagesResponse
+import com.propodcast.app.core.network.dto.response.RecommendationsResponse
+import com.propodcast.app.core.network.dto.response.RegionsResponse
+import com.propodcast.app.core.network.dto.response.SearchPodcastsResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query

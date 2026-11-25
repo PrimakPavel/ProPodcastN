@@ -1,4 +1,4 @@
-package com.propodcast.app.core.network.model
+package com.propodcast.app.core.network.dto
 
 import com.propodcast.app.core.model.Episode
 import kotlinx.serialization.SerialName
@@ -28,18 +28,18 @@ fun NetworkEpisode.toModel(
     fallbackImageUrl: String? = null,
     fallbackThumbnailUrl: String? = null,
 ): Episode {
-    val image = image.nullIfBlank()
-    val thumbnail = thumbnail.nullIfBlank()
+    val image = image?.ifBlank { null }
+    val thumbnail = thumbnail?.ifBlank { null }
     return Episode(
         id = id,
         title = title,
         description = description,
-        audioUrl = audio.nullIfBlank(),
+        audioUrl = audio?.ifBlank { null },
         imageUrl = image ?: thumbnail ?: fallbackImageUrl ?: fallbackThumbnailUrl,
         thumbnailUrl = thumbnail ?: image ?: fallbackThumbnailUrl ?: fallbackImageUrl,
         pubDateMs = pubDateMs,
         durationSec = audioLengthSec,
-        listennotesUrl = listennotesUrl.nullIfBlank(),
+        listennotesUrl = listennotesUrl?.ifBlank { null },
         podcastId = podcastId,
         podcastTitle = podcastTitle,
         explicitContent = explicitContent,

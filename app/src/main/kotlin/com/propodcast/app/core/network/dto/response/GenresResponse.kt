@@ -1,5 +1,6 @@
-package com.propodcast.app.core.network.model
+package com.propodcast.app.core.network.dto.response
 
+import com.propodcast.app.core.network.dto.NetworkGenre
 import kotlinx.serialization.Serializable
 
 @Serializable
