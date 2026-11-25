@@ -5,6 +5,11 @@ import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -33,6 +38,8 @@ import com.propodcast.app.core.ui.SnackbarEffect
 import com.propodcast.app.feature.downloads.DownloadsViewModel
 import com.propodcast.app.feature.downloads.CellularDownloadPrompt
 import com.propodcast.app.feature.downloads.rememberEpisodeDownloadActions
+import com.propodcast.app.feature.network.NetworkBannerViewModel
+import com.propodcast.app.feature.network.NetworkStatusBar
 import com.propodcast.app.feature.player.FullPlayerOverlay
 import com.propodcast.app.feature.player.MiniPlayer
 import com.propodcast.app.feature.player.PlayerViewModel
@@ -46,7 +53,9 @@ fun ProPodcastApp(
     navController: NavHostController = rememberNavController(),
     playerViewModel: PlayerViewModel = hiltViewModel(),
     downloadsViewModel: DownloadsViewModel = hiltViewModel(),
+    networkBannerViewModel: NetworkBannerViewModel = hiltViewModel(),
 ) {
+    val networkBanner by networkBannerViewModel.banner.collectAsStateWithLifecycle()
     val player by playerViewModel.uiState.collectAsStateWithLifecycle()
     val downloads = rememberEpisodeDownloadActions(downloadsViewModel)
     val playerSnackbar = remember { SnackbarHostState() }
@@ -72,7 +81,10 @@ fun ProPodcastApp(
             }
         },
     ) {
-        Column {
+        // The bottom system inset (gesture bar) is applied once here, below the mini player and network
+        // strip: with a navigation rail nothing else takes it, so they would sit under the gesture bar
+        // while the screens above added a gap of their own. With a bottom bar the bar already took it (0 here).
+        Column(Modifier.windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))) {
             CompositionLocalProvider(LocalSharedTransitionScope provides this@SharedTransitionLayout) {
                 AppNavHost(
                     navController = navController,
@@ -90,6 +102,7 @@ fun ProPodcastApp(
                     sharedTransitionScope = this@SharedTransitionLayout,
                 )
             }
+            NetworkStatusBar(networkBanner)
         }
     }
 

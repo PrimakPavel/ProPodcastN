@@ -38,6 +38,7 @@
     <string name="quota_resets_on">Resets on %1$s.</string>
 
     <!-- Home -->
+    <string name="nav_best">Best</string>
     <string name="home_go_to_downloads">Go to downloads</string>
     <string name="home_empty">No podcasts for these filters.</string>
 
@@ -119,4 +120,8 @@
     <string name="download_size_mb">%1$d MB</string>
     <string name="favorites_tab_downloads">Downloaded</string>
     <string name="favorites_downloads_empty">No downloads yet.\nDownload an episode to listen without internet.</string>
+
+    <!-- Network -->
+    <string name="network_offline">No connection</string>
+    <string name="network_back_online">Back online</string>
 </resources>
