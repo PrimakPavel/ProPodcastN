@@ -32,6 +32,15 @@ if (file("google-services.json").exists()) {
     logger.lifecycle("app/google-services.json not found: building without Firebase")
 }
 
+// Release signing reads keystore.properties in the project root (not in git):
+//   storeFile=keystore/release.jks   storePassword=...   keyAlias=...   keyPassword=...
+// Without the file the release build is left unsigned.
+val keystoreProperties = Properties().apply {
+    val file = rootProject.file("keystore.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+val hasReleaseSigning = keystoreProperties.getProperty("storeFile") != null
+
 val listenNotesMockUrl = "https://listen-api-test.listennotes.com/api/v2/"
 val listenNotesProductionUrl = "https://listen-api.listennotes.com/api/v2/"
 
@@ -54,6 +63,17 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
@@ -66,6 +86,7 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            if (hasReleaseSigning) signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

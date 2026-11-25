@@ -8,3 +8,9 @@
 .externalNativeBuild/
 .cxx/
 .kotlin/
+
+# Release signing: keystore and its passwords stay out of git
+/keystore/
+/keystore.properties
+*.jks
+*.keystore
