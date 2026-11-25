@@ -127,10 +127,15 @@ fun ProPodcastApp(
 private fun NavDestination.topLevelDestination(): TopLevelDestination? =
     TopLevelDestination.entries.firstOrNull { destination -> hierarchy.any { it.hasRoute(destination.routeClass) } }
 
+/**
+ * Opens a tab on its main screen. Each tab keeps its own state (list scroll, search query…), but anything
+ * opened on top of it (e.g. podcast details) is dropped, also when the tab is tapped again while deep inside.
+ */
 private fun NavHostController.navigateToTopLevel(destination: TopLevelDestination) {
     navigate(destination.route) {
         popUpTo(graph.findStartDestination().id) { saveState = true }
         launchSingleTop = true
         restoreState = true
     }
+    popBackStack(destination.routeClass, inclusive = false)
 }

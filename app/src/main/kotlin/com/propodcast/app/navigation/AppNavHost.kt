@@ -69,7 +69,14 @@ fun AppNavHost(
             Destination(this, origin = origin) {
                 PodcastDetailsScreen(
                     onBack = navController::navigateUp,
-                    onPodcastClick = { navController.navigate(it.detailsRoute(origin)) },
+                    // At most two details on the back stack: the one opened from a list and the latest
+                    // recommendation. From the first, a recommendation opens on top; from a recommendation,
+                    // the next one replaces it. Back: latest recommendation → first details → the list.
+                    onPodcastClick = {
+                        navController.navigate(it.detailsRoute(origin, fromRecommendation = true)) {
+                            if (route.fromRecommendation) popUpTo<PodcastDetailsRoute> { inclusive = true }
+                        }
+                    },
                     onPlayEpisode = onPlayEpisode,
                     preview = DetailsPreview(route.title, route.artworkUrl, route.artworkKey),
                 )

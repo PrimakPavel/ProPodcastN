@@ -14,14 +14,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.propodcast.app.R
 import com.propodcast.app.core.commonwidgets.BackButton
@@ -62,13 +60,8 @@ fun PodcastDetailsContent(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = {
-                    Text(
-                        text = loaded?.podcast?.title ?: preview.title ?: stringResource(R.string.podcast_details_title),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                },
+                // No title: the header below already names the podcast in large type.
+                title = {},
                 navigationIcon = { BackButton(onClick = onBack) },
                 actions = {
                     if (loaded != null) {

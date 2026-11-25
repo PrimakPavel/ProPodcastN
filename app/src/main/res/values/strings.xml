@@ -3,7 +3,6 @@
     <string name="best_podcasts_title">Best podcasts</string>
     <string name="favorites_title">Favorites</string>
     <string name="search_title">Search</string>
-    <string name="podcast_details_title">Podcast</string>
 
     <!-- Common actions -->
     <string name="action_retry">Retry</string>

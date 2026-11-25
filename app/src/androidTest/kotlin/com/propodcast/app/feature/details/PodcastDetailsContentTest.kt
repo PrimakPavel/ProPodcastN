@@ -1,5 +1,6 @@
 package com.propodcast.app.feature.details
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -71,6 +72,15 @@ class PodcastDetailsContentTest {
                 )
             }
         }
+    }
+
+    @Test
+    fun appBarHasNoTitle_headerHasIt() {
+        val loaded = PodcastDetailsUiState(content = DetailsContent.Loaded(podcast, emptyList(), nextEpisodePubDate = null))
+
+        setContent(state = loaded)
+
+        composeRule.onAllNodesWithText("Star Wars 7x7").assertCountEquals(1)
     }
 
     @Test
