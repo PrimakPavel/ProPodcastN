@@ -73,6 +73,10 @@ android {
         compose = true
         buildConfig = true
     }
+    testOptions {
+        // Robolectric tests (the Glance widget) need the app's resources.
+        unitTests.isIncludeAndroidResources = true
+    }
 }
 
 kotlin {
@@ -98,6 +102,8 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material3.adaptive.navigation.suite)
     implementation(libs.androidx.material.icons.core)
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.session)
     implementation(libs.kotlinx.coroutines.guava)
@@ -126,6 +132,9 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.glance.appwidget.testing)
+    testImplementation(libs.androidx.test.core)
     testImplementation(libs.okhttp.mockwebserver)
     testImplementation(libs.androidx.paging.testing)
     androidTestImplementation(libs.kotlinx.coroutines.test)

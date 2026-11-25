@@ -90,4 +90,9 @@
     <string name="player_error_network">Can’t load the episode. Check your connection.</string>
     <string name="player_error_source">This episode can’t be played.</string>
     <string name="player_no_audio">This episode has no audio file.</string>
+
+    <!-- Widget -->
+    <string name="widget_name">ProPodcast player</string>
+    <string name="widget_description">The last episode with play / pause</string>
+    <string name="widget_empty">Nothing played yet. Tap to find a podcast.</string>
 </resources>
