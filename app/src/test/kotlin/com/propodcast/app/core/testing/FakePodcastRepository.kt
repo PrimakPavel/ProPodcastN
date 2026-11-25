@@ -17,6 +17,10 @@ class FakePodcastRepository : PodcastRepository {
     var bestPodcastsResult: (genreId: Int?, region: String?) -> List<Podcast> = { _, _ -> emptyList() }
     var genresResult: Result<List<Genre>> = Result.success(emptyList())
     var regionsResult: Result<List<Region>> = Result.success(emptyList())
+    val detailsRequests = mutableListOf<Pair<String, Long?>>()
+    var detailsResult: (id: String, nextEpisodePubDate: Long?) -> Result<PodcastDetails> =
+        { _, _ -> Result.failure(NotImplementedError()) }
+    var recommendationsResult: Result<List<Podcast>> = Result.success(emptyList())
 
     override fun bestPodcasts(genreId: Int?, region: String?): Flow<PagingData<Podcast>> {
         bestPodcastRequests += genreId to region
@@ -27,10 +31,12 @@ class FakePodcastRepository : PodcastRepository {
     override fun searchPodcasts(query: String, language: String?): Flow<PagingData<Podcast>> =
         flowOf(PagingData.empty())
 
-    override suspend fun podcastDetails(id: String, nextEpisodePubDate: Long?): Result<PodcastDetails> =
-        Result.failure(NotImplementedError())
+    override suspend fun podcastDetails(id: String, nextEpisodePubDate: Long?): Result<PodcastDetails> {
+        detailsRequests += id to nextEpisodePubDate
+        return detailsResult(id, nextEpisodePubDate)
+    }
 
-    override suspend fun recommendations(id: String): Result<List<Podcast>> = Result.success(emptyList())
+    override suspend fun recommendations(id: String): Result<List<Podcast>> = recommendationsResult
 
     override suspend fun genres(): Result<List<Genre>> = genresResult
 

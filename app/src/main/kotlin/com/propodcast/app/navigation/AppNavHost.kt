@@ -5,7 +5,6 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.toRoute
 import com.propodcast.app.feature.details.PodcastDetailsScreen
 import com.propodcast.app.feature.favorites.FavoritesScreen
 import com.propodcast.app.feature.home.HomeScreen
@@ -26,10 +25,10 @@ fun AppNavHost(
         }
         composable<FavoritesRoute> { FavoritesScreen() }
         composable<SearchRoute> { SearchScreen() }
-        composable<PodcastDetailsRoute> { entry ->
+        composable<PodcastDetailsRoute> {
             PodcastDetailsScreen(
-                podcastId = entry.toRoute<PodcastDetailsRoute>().podcastId,
                 onBack = navController::navigateUp,
+                onPodcastClick = { navController.navigate(PodcastDetailsRoute(it.id)) },
             )
         }
     }

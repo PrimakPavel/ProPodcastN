@@ -45,4 +45,18 @@
     <string name="filters_all_genres">All genres</string>
     <string name="filters_default_region_suffix">%1$s (default)</string>
     <string name="filters_load_error">Could not load the list.</string>
+
+    <!-- Episodes -->
+    <string name="duration_hours_minutes">%1$d h %2$d min</string>
+    <string name="duration_minutes">%1$d min</string>
+    <string name="share_episode_chooser_title">Share episode</string>
+    <string name="playback_coming_soon">Playback is coming soon.</string>
+
+    <!-- Podcast details -->
+    <string name="details_episodes">Episodes</string>
+    <string name="details_load_more">Load more episodes</string>
+    <string name="details_recommendations">You may also like</string>
+    <string name="details_show_more">Show more</string>
+    <string name="details_show_less">Show less</string>
+    <string name="details_no_episodes">No episodes yet.</string>
 </resources>
