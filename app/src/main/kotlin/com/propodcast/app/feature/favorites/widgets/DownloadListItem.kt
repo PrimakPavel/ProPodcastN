@@ -45,11 +45,14 @@ internal fun DownloadListItem(
     val episode = download.episode
     val state = download.state
     val context = LocalContext.current
+    // An icon button brings its own 12 dp inner space, so the row needs only 4 dp after it; without one
+    // the text would run up to the edge, so it gets the same 16 dp as the start.
+    val hasAction = state.isActive || state.status == DownloadStatus.FAILED
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 4.dp),
+            .padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = if (hasAction) 4.dp else 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         PodcastImage(url = episode.thumbnailUrl ?: episode.imageUrl, modifier = Modifier.size(56.dp))
@@ -66,7 +69,7 @@ internal fun DownloadListItem(
                     text = it,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
