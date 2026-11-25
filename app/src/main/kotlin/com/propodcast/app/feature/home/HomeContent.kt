@@ -1,0 +1,82 @@
+package com.propodcast.app.feature.home
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.paging.compose.LazyPagingItems
+import com.propodcast.app.R
+import com.propodcast.app.core.commonwidgets.FloatingHeader
+import com.propodcast.app.core.commonwidgets.QuotaBanner
+import com.propodcast.app.core.commonwidgets.rememberFloatingHeaderScrollBehavior
+import com.propodcast.app.core.model.ApiQuota
+import com.propodcast.app.core.model.Podcast
+import com.propodcast.app.feature.filters.FiltersTab
+import com.propodcast.app.feature.filters.FiltersUiState
+import com.propodcast.app.feature.home.widgets.ActiveFilters
+import com.propodcast.app.feature.home.widgets.PodcastsList
+
+/** Stateless home content, also used by UI tests. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeContent(
+    podcasts: LazyPagingItems<Podcast>,
+    favoriteIds: Set<String>,
+    quota: ApiQuota?,
+    filtersState: FiltersUiState,
+    onPodcastClick: (Podcast) -> Unit,
+    onToggleFavorite: (Podcast) -> Unit,
+    onShare: (Podcast) -> Unit,
+    onOpenFilters: (FiltersTab) -> Unit,
+    onClearGenre: () -> Unit,
+    onClearRegion: () -> Unit,
+    modifier: Modifier = Modifier,
+    filtersPinned: Boolean = false,
+) {
+    // Filter chips hide while scrolling down and come back on scroll up (pass filtersPinned = true to keep them).
+    val filtersScrollBehavior = rememberFloatingHeaderScrollBehavior(pinned = filtersPinned)
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.best_podcasts_title)) },
+                actions = {
+                    IconButton(onClick = { onOpenFilters(FiltersTab.GENRE) }) {
+                        BadgedBox(badge = { if (filtersState.hasActiveFilters) Badge() }) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_filter_list),
+                                contentDescription = stringResource(R.string.action_filters),
+                            )
+                        }
+                    }
+                },
+            )
+        },
+    ) { innerPadding ->
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .nestedScroll(filtersScrollBehavior.nestedScrollConnection),
+        ) {
+            QuotaBanner(quota)
+            FloatingHeader(filtersScrollBehavior, Modifier.testTag(FILTER_CHIPS_TAG)) {
+                ActiveFilters(filtersState, onOpenFilters, onClearGenre, onClearRegion)
+            }
+            PodcastsList(podcasts, favoriteIds, onPodcastClick, onToggleFavorite, onShare)
+        }
+    }
+}

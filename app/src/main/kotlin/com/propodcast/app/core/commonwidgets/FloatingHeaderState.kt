@@ -1,4 +1,4 @@
-package com.propodcast.app.core.designsystem.component
+package com.propodcast.app.core.commonwidgets
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable

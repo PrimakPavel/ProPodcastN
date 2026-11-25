@@ -3,15 +3,9 @@ package com.propodcast.app.feature.filters
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -22,15 +16,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.propodcast.app.R
-import com.propodcast.app.core.designsystem.component.LoadingState
-import com.propodcast.app.core.designsystem.component.MessageState
-import com.propodcast.app.core.model.Genre
-import com.propodcast.app.core.model.Region
-import com.propodcast.app.core.network.ListenNotesApi
-import com.propodcast.app.core.ui.message
+import com.propodcast.app.feature.filters.widgets.OptionsList
+import com.propodcast.app.feature.filters.widgets.genreOptions
+import com.propodcast.app.feature.filters.widgets.regionOptions
 
 /** Bottom sheet with Genre / Region tabs. A selection is applied right away; swipe down to close. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,56 +61,4 @@ fun FiltersSheet(
             }
         }
     }
-}
-
-enum class FiltersTab(val titleRes: Int) {
-    GENRE(R.string.filters_genre),
-    REGION(R.string.filters_region),
-}
-
-@Composable
-private fun <T> OptionsList(
-    options: OptionsState<T>,
-    onRetry: () -> Unit,
-    modifier: Modifier,
-    content: LazyListScope.(List<T>) -> Unit,
-) {
-    when (options) {
-        OptionsState.Loading -> LoadingState(modifier)
-        is OptionsState.Error -> MessageState(
-            message = stringResource(R.string.filters_load_error) + "\n" + options.error.message(),
-            onRetry = onRetry,
-            modifier = modifier,
-        )
-        is OptionsState.Loaded -> LazyColumn(modifier) { content(options.items) }
-    }
-}
-
-private fun LazyListScope.genreOptions(genres: List<Genre>, selectedId: Int?, onSelect: (Int?) -> Unit) {
-    item(key = "all") {
-        OptionRow(label = stringResource(R.string.filters_all_genres), selected = selectedId == null) { onSelect(null) }
-    }
-    items(genres, key = { it.id }) { genre ->
-        OptionRow(label = genre.name, selected = genre.id == selectedId) { onSelect(genre.id) }
-    }
-}
-
-private fun LazyListScope.regionOptions(regions: List<Region>, selectedCode: String, onSelect: (String?) -> Unit) {
-    items(regions, key = { it.code }) { region ->
-        val label = if (region.code == ListenNotesApi.DEFAULT_REGION) {
-            stringResource(R.string.filters_default_region_suffix, region.name)
-        } else {
-            region.name
-        }
-        OptionRow(label = label, selected = region.code == selectedCode) { onSelect(region.code) }
-    }
-}
-
-@Composable
-private fun OptionRow(label: String, selected: Boolean, onClick: () -> Unit) {
-    ListItem(
-        headlineContent = { Text(label) },
-        leadingContent = { RadioButton(selected = selected, onClick = null) },
-        modifier = Modifier.selectable(selected = selected, role = Role.RadioButton, onClick = onClick),
-    )
 }

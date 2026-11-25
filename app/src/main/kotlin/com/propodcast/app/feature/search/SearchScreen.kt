@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.propodcast.app.R
-import com.propodcast.app.core.designsystem.component.PlaceholderScreen
+import com.propodcast.app.core.commonwidgets.PlaceholderScreen
 
 @Composable
 fun SearchScreen(modifier: Modifier = Modifier) {

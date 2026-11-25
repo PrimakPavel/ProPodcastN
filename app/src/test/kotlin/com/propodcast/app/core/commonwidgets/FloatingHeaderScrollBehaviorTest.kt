@@ -1,4 +1,4 @@
-package com.propodcast.app.core.designsystem.component
+package com.propodcast.app.core.commonwidgets
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource

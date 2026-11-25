@@ -1,4 +1,4 @@
-package com.propodcast.app.feature.details
+package com.propodcast.app.feature.details.widgets
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,8 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.unit.dp
 import com.propodcast.app.R
-import com.propodcast.app.core.designsystem.component.ExpandableHtmlText
-import com.propodcast.app.core.designsystem.component.PodcastImage
+import com.propodcast.app.core.commonwidgets.ExpandableHtmlText
+import com.propodcast.app.core.commonwidgets.PodcastImage
 import com.propodcast.app.core.model.Podcast
 
 /** Artwork, title, publisher, episode count and the (HTML) description. */

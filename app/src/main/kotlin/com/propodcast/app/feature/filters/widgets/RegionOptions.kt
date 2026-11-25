@@ -1,0 +1,20 @@
+package com.propodcast.app.feature.filters.widgets
+
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.res.stringResource
+import com.propodcast.app.R
+import com.propodcast.app.core.model.Region
+import com.propodcast.app.core.network.ListenNotesApi
+
+/** One radio row per region; the API default region is labelled "(default)". */
+internal fun LazyListScope.regionOptions(regions: List<Region>, selectedCode: String, onSelect: (String?) -> Unit) {
+    items(regions, key = { it.code }) { region ->
+        val label = if (region.code == ListenNotesApi.DEFAULT_REGION) {
+            stringResource(R.string.filters_default_region_suffix, region.name)
+        } else {
+            region.name
+        }
+        OptionRow(label = label, selected = region.code == selectedCode) { onSelect(region.code) }
+    }
+}

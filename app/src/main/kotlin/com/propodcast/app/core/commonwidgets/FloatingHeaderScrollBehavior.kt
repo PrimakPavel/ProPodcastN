@@ -1,4 +1,4 @@
-package com.propodcast.app.core.designsystem.component
+package com.propodcast.app.core.commonwidgets
 
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.AnimationState

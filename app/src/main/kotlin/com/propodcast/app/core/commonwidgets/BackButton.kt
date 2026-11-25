@@ -1,4 +1,4 @@
-package com.propodcast.app.core.designsystem.component
+package com.propodcast.app.core.commonwidgets
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
