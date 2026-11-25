@@ -5,6 +5,7 @@ import com.propodcast.app.R
 import com.propodcast.app.core.connectivity.ConnectionType
 import com.propodcast.app.core.testing.FakeConnectivityMonitor
 import com.propodcast.app.core.testing.FakeDownloadsRepository
+import com.propodcast.app.core.testing.FakeUserPreferencesRepository
 import com.propodcast.app.core.testing.MainDispatcherRule
 import com.propodcast.app.core.testing.testEpisode
 import kotlinx.coroutines.test.runTest
@@ -21,8 +22,9 @@ class DownloadsViewModelTest {
 
     private val repository = FakeDownloadsRepository()
     private val connectivity = FakeConnectivityMonitor()
+    private val preferences = FakeUserPreferencesRepository()
     // Lazy: created after MainDispatcherRule has swapped Dispatchers.Main (viewModelScope uses it).
-    private val viewModel by lazy { DownloadsViewModel(repository, connectivity) }
+    private val viewModel by lazy { DownloadsViewModel(repository, connectivity, preferences) }
     private val episode = testEpisode("e1")
 
     @Test
@@ -53,6 +55,20 @@ class DownloadsViewModelTest {
         viewModel.confirmDownload()
         assertEquals(listOf("enqueue e1"), repository.calls)
         assertNull(viewModel.confirmation.value)
+    }
+
+    @Test
+    fun onMobileData_wifiOnly_queuesWithoutAsking_andSaysItWaitsForWifi() = runTest {
+        connectivity.connection.value = ConnectionType.METERED
+        preferences.setDownloadOnlyOnWifi(true)
+
+        viewModel.snackbarEvents.test {
+            viewModel.download(episode)
+
+            assertEquals(R.string.download_waiting_wifi, awaitItem().messageRes)
+            assertEquals(listOf("enqueue e1"), repository.calls)
+            assertNull("no mobile data dialog", viewModel.confirmation.value)
+        }
     }
 
     @Test

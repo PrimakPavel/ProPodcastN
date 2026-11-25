@@ -8,6 +8,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class FakeUserPreferencesRepository(initial: PodcastFilters = PodcastFilters()) : UserPreferencesRepository {
     override val filters: MutableStateFlow<PodcastFilters> = MutableStateFlow(initial)
     override val lastPlayed: MutableStateFlow<LastPlayed?> = MutableStateFlow(null)
+    override val downloadOnlyOnWifi = MutableStateFlow(false)
+
+    override suspend fun setDownloadOnlyOnWifi(enabled: Boolean) {
+        downloadOnlyOnWifi.value = enabled
+    }
 
     override suspend fun setGenre(genreId: Int?) {
         filters.value = filters.value.copy(genreId = genreId)

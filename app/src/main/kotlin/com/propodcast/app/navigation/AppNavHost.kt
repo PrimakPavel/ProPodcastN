@@ -18,6 +18,7 @@ import com.propodcast.app.feature.favorites.FavoritesScreen
 import com.propodcast.app.feature.favorites.FavoritesTab
 import com.propodcast.app.feature.home.HomeScreen
 import com.propodcast.app.feature.search.SearchScreen
+import com.propodcast.app.feature.settings.SettingsScreen
 
 @Composable
 fun AppNavHost(
@@ -35,6 +36,7 @@ fun AppNavHost(
             Destination(this, origin = "home") {
                 HomeScreen(
                     onPodcastClick = { navController.navigate(it.detailsRoute("home")) },
+                    onOpenSettings = { navController.navigate(SettingsRoute) },
                     onOpenDownloads = {
                         // Like the bottom bar's Favorites, but straight to the Downloaded tab.
                         navController.navigate(FavoritesRoute(initialTab = FavoritesTab.DOWNLOADS.name)) {
@@ -60,6 +62,11 @@ fun AppNavHost(
         composable<SearchRoute> {
             Destination(this, origin = "search") {
                 SearchScreen(onPodcastClick = { navController.navigate(it.detailsRoute("search")) })
+            }
+        }
+        composable<SettingsRoute> {
+            Destination(this, origin = "settings") {
+                SettingsScreen(onBack = navController::navigateUp)
             }
         }
         composable<PodcastDetailsRoute> { entry ->

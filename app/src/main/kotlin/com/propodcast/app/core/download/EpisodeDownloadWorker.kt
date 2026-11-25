@@ -127,13 +127,19 @@ class EpisodeDownloadWorker @AssistedInject constructor(
         fun episodeIdFromTags(tags: Set<String>): String? =
             tags.firstOrNull { it.startsWith(EPISODE_TAG_PREFIX) }?.removePrefix(EPISODE_TAG_PREFIX)
 
-        fun request(episodeId: String): OneTimeWorkRequest = OneTimeWorkRequestBuilder<EpisodeDownloadWorker>()
-            .setInputData(workDataOf(KEY_EPISODE_ID to episodeId))
-            .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
-            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, BACKOFF_SECONDS, TimeUnit.SECONDS)
-            .addTag(TAG)
-            .addTag(EPISODE_TAG_PREFIX + episodeId)
-            .build()
+        /** [wifiOnly]: waits for an unmetered network (Wi-Fi / Ethernet) instead of any connection. */
+        fun request(episodeId: String, wifiOnly: Boolean = false): OneTimeWorkRequest =
+            OneTimeWorkRequestBuilder<EpisodeDownloadWorker>()
+                .setInputData(workDataOf(KEY_EPISODE_ID to episodeId))
+                .setConstraints(
+                    Constraints.Builder()
+                        .setRequiredNetworkType(if (wifiOnly) NetworkType.UNMETERED else NetworkType.CONNECTED)
+                        .build(),
+                )
+                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, BACKOFF_SECONDS, TimeUnit.SECONDS)
+                .addTag(TAG)
+                .addTag(EPISODE_TAG_PREFIX + episodeId)
+                .build()
 
         private const val BACKOFF_SECONDS = 15L
     }

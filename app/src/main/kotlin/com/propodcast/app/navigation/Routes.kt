@@ -11,3 +11,6 @@ data class FavoritesRoute(val initialTab: String? = null)
 
 @Serializable
 data object SearchRoute
+
+@Serializable
+data object SettingsRoute

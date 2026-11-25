@@ -22,6 +22,7 @@ import com.propodcast.app.feature.filters.FiltersViewModel
 fun HomeScreen(
     onPodcastClick: (Podcast) -> Unit,
     onOpenDownloads: () -> Unit,
+    onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     filtersViewModel: FiltersViewModel = hiltViewModel(),
@@ -47,6 +48,7 @@ fun HomeScreen(
         },
         onOpenFilters = { tab -> sheetTab = tab },
         onOpenDownloads = onOpenDownloads.takeIf { hasDownloads },
+        onOpenSettings = onOpenSettings,
         onClearGenre = { filtersViewModel.selectGenre(null) },
         onClearRegion = { filtersViewModel.selectRegion(null) },
         modifier = modifier,

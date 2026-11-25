@@ -80,4 +80,14 @@ class DataStoreUserPreferencesRepositoryTest {
             assertNull(awaitItem())
         }
     }
+
+    @Test
+    fun downloadOnlyOnWifi_offByDefault_andPersists() = runTest(UnconfinedTestDispatcher()) {
+        val repository = repository()
+        repository.downloadOnlyOnWifi.test {
+            assertEquals(false, awaitItem())
+            repository.setDownloadOnlyOnWifi(true)
+            assertEquals(true, awaitItem())
+        }
+    }
 }

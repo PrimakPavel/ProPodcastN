@@ -6,6 +6,7 @@ import com.propodcast.app.R
 import com.propodcast.app.core.connectivity.ConnectionType
 import com.propodcast.app.core.connectivity.ConnectivityMonitor
 import com.propodcast.app.core.data.repository.DownloadsRepository
+import com.propodcast.app.core.data.repository.UserPreferencesRepository
 import com.propodcast.app.core.model.Episode
 import com.propodcast.app.core.model.EpisodeDownloadState
 import com.propodcast.app.core.ui.SnackbarEvent
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -29,6 +31,7 @@ import kotlinx.coroutines.launch
 class DownloadsViewModel @Inject constructor(
     private val repository: DownloadsRepository,
     private val connectivity: ConnectivityMonitor,
+    private val preferences: UserPreferencesRepository,
 ) : ViewModel() {
 
     val states: StateFlow<Map<String, EpisodeDownloadState>> = repository.states
@@ -43,15 +46,20 @@ class DownloadsViewModel @Inject constructor(
     val snackbarEvents: Flow<SnackbarEvent> = snackbarChannel.receiveAsFlow()
 
     /**
-     * Wi-Fi / Ethernet: starts right away. Mobile data: asks first. No network: queues it, WorkManager
-     * starts it once a network is back.
+     * Wi-Fi / Ethernet: starts right away. Mobile data: asks first, or with "Download only on Wi-Fi" queues it
+     * for Wi-Fi without asking. No network: queues it, WorkManager starts it once a network is back.
      */
     fun download(episode: Episode) {
         if (episode.audioUrl == null) return
-        if (connectivity.currentConnection() == ConnectionType.METERED) {
-            mutableConfirmation.value = episode
-        } else {
-            enqueue(episode)
+        viewModelScope.launch {
+            if (connectivity.currentConnection() != ConnectionType.METERED) {
+                repository.enqueue(episode)
+            } else if (preferences.downloadOnlyOnWifi.first()) {
+                repository.enqueue(episode)
+                snackbarChannel.send(SnackbarEvent(messageRes = R.string.download_waiting_wifi))
+            } else {
+                mutableConfirmation.value = episode
+            }
         }
     }
 

@@ -2,6 +2,7 @@ package com.propodcast.app.core.data.repository
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
@@ -27,6 +28,10 @@ interface UserPreferencesRepository {
     suspend fun setLastPlayed(lastPlayed: LastPlayed)
     suspend fun updateLastPlayedPosition(positionMs: Long)
     suspend fun clearLastPlayed()
+
+    /** Settings: downloads wait for Wi-Fi instead of using mobile data. Off by default. */
+    val downloadOnlyOnWifi: Flow<Boolean>
+    suspend fun setDownloadOnlyOnWifi(enabled: Boolean)
 }
 
 @Singleton
@@ -59,6 +64,12 @@ class DataStoreUserPreferencesRepository @Inject constructor(
             )
         }
         .distinctUntilChanged()
+
+    override val downloadOnlyOnWifi: Flow<Boolean> = dataStore.data
+        .map { it[Keys.DOWNLOAD_ONLY_ON_WIFI] ?: false }
+        .distinctUntilChanged()
+
+    override suspend fun setDownloadOnlyOnWifi(enabled: Boolean) = edit(Keys.DOWNLOAD_ONLY_ON_WIFI, enabled)
 
     override suspend fun setGenre(genreId: Int?) = edit(Keys.GENRE_ID, genreId)
 
@@ -113,5 +124,7 @@ class DataStoreUserPreferencesRepository @Inject constructor(
         val LAST_IMAGE_URL = stringPreferencesKey("last_image_url")
         val LAST_POSITION_MS = longPreferencesKey("last_position_ms")
         val LAST_DURATION_MS = longPreferencesKey("last_duration_ms")
+
+        val DOWNLOAD_ONLY_ON_WIFI = booleanPreferencesKey("download_only_on_wifi")
     }
 }

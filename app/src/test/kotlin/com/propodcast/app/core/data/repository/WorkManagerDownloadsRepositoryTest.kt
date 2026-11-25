@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.work.Configuration
+import androidx.work.NetworkType
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.testing.SynchronousExecutor
@@ -14,6 +15,7 @@ import com.propodcast.app.core.download.EpisodeDownloadWorker
 import com.propodcast.app.core.download.EpisodeFileStore
 import com.propodcast.app.core.model.DownloadStatus
 import com.propodcast.app.core.testing.FakeAnalyticsTracker
+import com.propodcast.app.core.testing.FakeUserPreferencesRepository
 import com.propodcast.app.core.testing.TestClock
 import com.propodcast.app.core.testing.testEpisode
 import kotlinx.coroutines.flow.first
@@ -40,6 +42,7 @@ class WorkManagerDownloadsRepositoryTest {
     private lateinit var files: EpisodeFileStore
     private lateinit var repository: WorkManagerDownloadsRepository
     private val analytics = FakeAnalyticsTracker()
+    private val preferences = FakeUserPreferencesRepository()
 
     @Before
     fun setUp() {
@@ -50,7 +53,7 @@ class WorkManagerDownloadsRepositoryTest {
         workManager = WorkManager.getInstance(context)
         db = Room.inMemoryDatabaseBuilder(context, ProPodcastDatabase::class.java).allowMainThreadQueries().build()
         files = EpisodeFileStore(context)
-        repository = WorkManagerDownloadsRepository(db.downloadedEpisodeDao(), workManager, files, TestClock(1_000), analytics)
+        repository = WorkManagerDownloadsRepository(db.downloadedEpisodeDao(), workManager, files, TestClock(1_000), analytics, preferences)
     }
 
     @After
@@ -59,8 +62,10 @@ class WorkManagerDownloadsRepositoryTest {
         files.delete("e1")
     }
 
-    private fun workState() =
-        workManager.getWorkInfosForUniqueWork(EpisodeDownloadWorker.uniqueWorkName("e1")).get().single().state
+    private fun workInfo(): WorkInfo =
+        workManager.getWorkInfosForUniqueWork(EpisodeDownloadWorker.uniqueWorkName("e1")).get().single()
+
+    private fun workState() = workInfo().state
 
     @Test
     fun enqueue_queuesTheWork_andListsTheEpisode() = runTest {
@@ -72,6 +77,16 @@ class WorkManagerDownloadsRepositoryTest {
         assertEquals("e1", download.episode.id)
         assertEquals(DownloadStatus.QUEUED, download.state.status)
         assertTrue(download.state.isActive)
+    }
+
+    @Test
+    fun downloadOnlyOnWifi_waitsForAnUnmeteredNetwork() = runTest {
+        repository.enqueue(testEpisode("e1"))
+        assertEquals(NetworkType.CONNECTED, workInfo().constraints.requiredNetworkType)
+
+        preferences.setDownloadOnlyOnWifi(true)
+        repository.enqueue(testEpisode("e1"))
+        assertEquals(NetworkType.UNMETERED, workInfo().constraints.requiredNetworkType)
     }
 
     @Test

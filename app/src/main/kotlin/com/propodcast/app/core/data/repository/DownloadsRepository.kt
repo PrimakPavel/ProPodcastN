@@ -24,6 +24,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -35,7 +36,7 @@ interface DownloadsRepository {
     /** episodeId → state, for the indicators in episode lists. */
     val states: Flow<Map<String, EpisodeDownloadState>>
 
-    /** Queues the download (again, if it failed). Episodes without audio are ignored. */
+    /** Queues the download (again, if it failed), Wi-Fi only if so set. Episodes without audio are ignored. */
     suspend fun enqueue(episode: Episode)
 
     /** Stops a queued or running download and forgets it. */
@@ -57,6 +58,7 @@ class WorkManagerDownloadsRepository @Inject constructor(
     private val files: EpisodeFileStore,
     private val clock: Clock,
     private val analytics: AnalyticsTracker,
+    private val preferences: UserPreferencesRepository,
 ) : DownloadsRepository {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -95,7 +97,7 @@ class WorkManagerDownloadsRepository @Inject constructor(
         workManager.enqueueUniqueWork(
             EpisodeDownloadWorker.uniqueWorkName(episode.id),
             ExistingWorkPolicy.REPLACE,
-            EpisodeDownloadWorker.request(episode.id),
+            EpisodeDownloadWorker.request(episode.id, wifiOnly = preferences.downloadOnlyOnWifi.first()),
         )
         analytics.logEvent(AnalyticsEvents.DOWNLOAD_EPISODE)
     }

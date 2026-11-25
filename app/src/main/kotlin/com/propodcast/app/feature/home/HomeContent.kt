@@ -3,6 +3,8 @@ package com.propodcast.app.feature.home
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
@@ -46,6 +48,7 @@ fun HomeContent(
     filtersPinned: Boolean = false,
     /** When set, an empty or failed list offers "Go to downloads" (e.g. offline with downloaded episodes). */
     onOpenDownloads: (() -> Unit)? = null,
+    onOpenSettings: () -> Unit = {},
 ) {
     // Filter chips hide while scrolling down and come back on scroll up (pass filtersPinned = true to keep them).
     val filtersScrollBehavior = rememberFloatingHeaderScrollBehavior(pinned = filtersPinned)
@@ -55,6 +58,9 @@ fun HomeContent(
             TopAppBar(
                 title = { Text(stringResource(R.string.best_podcasts_title)) },
                 actions = {
+                    IconButton(onClick = onOpenSettings) {
+                        Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.action_settings))
+                    }
                     IconButton(onClick = { onOpenFilters(FiltersTab.GENRE) }) {
                         BadgedBox(badge = { if (filtersState.hasActiveFilters) Badge() }) {
                             Icon(
