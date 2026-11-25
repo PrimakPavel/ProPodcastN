@@ -9,13 +9,22 @@ plugins {
     alias(libs.plugins.room)
 }
 
-// Listen Notes API key lives in local.properties (not in git):
-//   LISTEN_NOTES_API_KEY=...
+// Listen Notes settings live in local.properties (not in git):
+//   LISTEN_NOTES_API_KEY=...              key for the production API (release, and debug when the switch is on)
+//   LISTEN_NOTES_USE_PRODUCTION=true      optional: debug builds use the production API instead of the mock server
 val localProperties = Properties().apply {
     val file = rootProject.file("local.properties")
     if (file.exists()) file.inputStream().use { load(it) }
 }
-val listenNotesApiKey: String = localProperties.getProperty("LISTEN_NOTES_API_KEY", "")
+val listenNotesApiKey: String = localProperties.getProperty("LISTEN_NOTES_API_KEY", "").trim()
+val debugUsesProductionApi: Boolean =
+    localProperties.getProperty("LISTEN_NOTES_USE_PRODUCTION", "false").trim().toBoolean()
+if (debugUsesProductionApi && listenNotesApiKey.isEmpty()) {
+    throw GradleException("LISTEN_NOTES_USE_PRODUCTION=true needs LISTEN_NOTES_API_KEY in local.properties")
+}
+
+val listenNotesMockUrl = "https://listen-api-test.listennotes.com/api/v2/"
+val listenNotesProductionUrl = "https://listen-api.listennotes.com/api/v2/"
 
 android {
     namespace = "com.propodcast.app"
@@ -34,9 +43,11 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
-            // Listen Notes mock server: fake data, no API key required.
-            buildConfigField("String", "LISTEN_NOTES_BASE_URL", "\"https://listen-api-test.listennotes.com/api/v2/\"")
-            buildConfigField("String", "LISTEN_NOTES_API_KEY", "\"\"")
+            // Mock server by default (fake data, no key); production API when LISTEN_NOTES_USE_PRODUCTION=true.
+            val debugBaseUrl = if (debugUsesProductionApi) listenNotesProductionUrl else listenNotesMockUrl
+            val debugApiKey = if (debugUsesProductionApi) listenNotesApiKey else ""
+            buildConfigField("String", "LISTEN_NOTES_BASE_URL", "\"$debugBaseUrl\"")
+            buildConfigField("String", "LISTEN_NOTES_API_KEY", "\"$debugApiKey\"")
         }
         release {
             isMinifyEnabled = true
@@ -45,7 +56,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "LISTEN_NOTES_BASE_URL", "\"https://listen-api.listennotes.com/api/v2/\"")
+            buildConfigField("String", "LISTEN_NOTES_BASE_URL", "\"$listenNotesProductionUrl\"")
             buildConfigField("String", "LISTEN_NOTES_API_KEY", "\"$listenNotesApiKey\"")
         }
     }
