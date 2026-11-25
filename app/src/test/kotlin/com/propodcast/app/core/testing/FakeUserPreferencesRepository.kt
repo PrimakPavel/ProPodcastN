@@ -4,11 +4,10 @@ import com.propodcast.app.core.data.repository.UserPreferencesRepository
 import com.propodcast.app.core.model.LastPlayed
 import com.propodcast.app.core.model.PodcastFilters
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 class FakeUserPreferencesRepository(initial: PodcastFilters = PodcastFilters()) : UserPreferencesRepository {
     override val filters: MutableStateFlow<PodcastFilters> = MutableStateFlow(initial)
-    override val lastPlayed: StateFlow<LastPlayed?> = MutableStateFlow(null)
+    override val lastPlayed: MutableStateFlow<LastPlayed?> = MutableStateFlow(null)
 
     override suspend fun setGenre(genreId: Int?) {
         filters.value = filters.value.copy(genreId = genreId)
@@ -22,7 +21,15 @@ class FakeUserPreferencesRepository(initial: PodcastFilters = PodcastFilters()) 
         filters.value = filters.value.copy(language = language)
     }
 
-    override suspend fun setLastPlayed(lastPlayed: LastPlayed) = Unit
-    override suspend fun updateLastPlayedPosition(positionMs: Long) = Unit
-    override suspend fun clearLastPlayed() = Unit
+    override suspend fun setLastPlayed(lastPlayed: LastPlayed) {
+        this.lastPlayed.value = lastPlayed
+    }
+
+    override suspend fun updateLastPlayedPosition(positionMs: Long) {
+        lastPlayed.value = lastPlayed.value?.copy(positionMs = positionMs)
+    }
+
+    override suspend fun clearLastPlayed() {
+        lastPlayed.value = null
+    }
 }

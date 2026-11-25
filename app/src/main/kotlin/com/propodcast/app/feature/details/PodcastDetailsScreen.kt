@@ -11,6 +11,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.propodcast.app.R
+import com.propodcast.app.core.model.Episode
 import com.propodcast.app.core.model.Podcast
 import com.propodcast.app.core.ui.shareLink
 import kotlinx.coroutines.launch
@@ -19,6 +20,7 @@ import kotlinx.coroutines.launch
 fun PodcastDetailsScreen(
     onBack: () -> Unit,
     onPodcastClick: (Podcast) -> Unit,
+    onPlayEpisode: (Episode) -> Boolean,
     modifier: Modifier = Modifier,
     viewModel: PodcastDetailsViewModel = hiltViewModel(),
 ) {
@@ -26,7 +28,7 @@ fun PodcastDetailsScreen(
     val context = LocalContext.current
     val sharePodcastTitle = stringResource(R.string.share_chooser_title)
     val shareEpisodeTitle = stringResource(R.string.share_episode_chooser_title)
-    val playbackSoon = stringResource(R.string.playback_coming_soon)
+    val noAudio = stringResource(R.string.player_no_audio)
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -40,8 +42,9 @@ fun PodcastDetailsScreen(
         onSharePodcast = { podcast ->
             podcast.listennotesUrl?.let { context.shareLink(podcast.title, it, sharePodcastTitle) }
         },
-        // Playback arrives in stage 6.
-        onEpisodeClick = { scope.launch { snackbarHostState.showSnackbar(playbackSoon) } },
+        onEpisodeClick = { episode ->
+            if (!onPlayEpisode(episode)) scope.launch { snackbarHostState.showSnackbar(noAudio) }
+        },
         onToggleEpisodeFavorite = viewModel::toggleEpisodeFavorite,
         onShareEpisode = { episode ->
             episode.listennotesUrl?.let { context.shareLink(episode.title, it, shareEpisodeTitle) }

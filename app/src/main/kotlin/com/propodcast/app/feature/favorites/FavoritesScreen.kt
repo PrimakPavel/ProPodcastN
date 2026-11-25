@@ -14,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.propodcast.app.R
+import com.propodcast.app.core.model.Episode
 import com.propodcast.app.core.model.Podcast
 import com.propodcast.app.core.model.RemovedFavorite
 import com.propodcast.app.core.ui.shareLink
@@ -22,6 +23,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun FavoritesScreen(
     onPodcastClick: (Podcast) -> Unit,
+    onPlayEpisode: (Episode) -> Boolean,
     modifier: Modifier = Modifier,
     viewModel: FavoritesViewModel = hiltViewModel(),
 ) {
@@ -29,7 +31,7 @@ fun FavoritesScreen(
     val context = LocalContext.current
     val sharePodcastTitle = stringResource(R.string.share_chooser_title)
     val shareEpisodeTitle = stringResource(R.string.share_episode_chooser_title)
-    val playbackSoon = stringResource(R.string.playback_coming_soon)
+    val noAudio = stringResource(R.string.player_no_audio)
     val undoLabel = stringResource(R.string.action_undo)
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -58,8 +60,9 @@ fun FavoritesScreen(
         onSharePodcast = { podcast ->
             podcast.listennotesUrl?.let { context.shareLink(podcast.title, it, sharePodcastTitle) }
         },
-        // Playback arrives in stage 6.
-        onEpisodeClick = { scope.launch { snackbarHostState.showSnackbar(playbackSoon) } },
+        onEpisodeClick = { episode ->
+            if (!onPlayEpisode(episode)) scope.launch { snackbarHostState.showSnackbar(noAudio) }
+        },
         onRemoveEpisode = viewModel::removeEpisode,
         onShareEpisode = { episode ->
             episode.listennotesUrl?.let { context.shareLink(episode.title, it, shareEpisodeTitle) }

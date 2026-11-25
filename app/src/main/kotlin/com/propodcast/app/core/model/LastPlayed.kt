@@ -8,4 +8,5 @@ data class LastPlayed(
     val audioUrl: String,
     val imageUrl: String?,
     val positionMs: Long,
+    val durationMs: Long = 0,
 )

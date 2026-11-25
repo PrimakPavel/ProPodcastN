@@ -56,6 +56,7 @@ class DataStoreUserPreferencesRepositoryTest {
             audioUrl = "https://example.com/a.mp3",
             imageUrl = "https://example.com/a.jpg",
             positionMs = 0,
+            durationMs = 3_600_000,
         )
         repository.lastPlayed.test {
             assertNull(awaitItem())

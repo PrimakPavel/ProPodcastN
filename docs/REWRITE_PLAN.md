@@ -146,12 +146,13 @@ com.propodcast.app
 - Вкладки перемикаються лише натиском: горизонтальний свайп по рядку — це видалення, тож пейджер його не перехоплює.
 - Подкаст відкриває деталі; натиск на епізод поки показує «Playback is coming soon» — відтворення в етапі 6.
 
-**Етап 6. Плеєр (Media3)**
-- `PlaybackService : MediaSessionService` з ExoPlayer — нотифікація, lock screen, audio focus, кнопки гарнітури автоматично.
-- `PlayerController` (Hilt singleton) над `MediaController`: `StateFlow<PlayerState>` (трек, isPlaying, buffering, position, duration, error).
-- Mini player над нижньою навігацією + повноекранний плеєр (seek, ±15/30 с, швидкість — опційно).
-- Збереження останнього треку й позиції → «Продовжити» (замість FAB старого проекту).
-- Дозвіл `POST_NOTIFICATIONS` (Android 13+), `FOREGROUND_SERVICE_MEDIA_PLAYBACK`.
+**Етап 6. Плеєр (Media3)** ✅
+- Media3 1.11.1: `PlaybackService` (MediaSessionService + ExoPlayer) — нотифікація, lock screen, аудіофокус, пауза при від'єднанні навушників; у нотифікації −15 / +30 с замість попереднього / наступного.
+- `PlayerController` (Hilt singleton над `MediaController`): `StateFlow<PlayerState>`, play / pause / seek / ±15·30 с / швидкість / stop. Сам зберігає останній епізод і позицію (кожні 5 с і на паузі), бо відтворення живе довше за Activity.
+- Міні-плеєр над нижньою навігацією (прогрес, play / pause, ✕) і повний плеєр у шторці (обкладинка, seek bar з часом, −15 / play / +30, швидкість 1× → 1.25× → 1.5× → 1.75× → 2× → 0.75×).
+- «Продовжити» замість FAB: після перезапуску міні-плеєр показує останній епізод («Continue listening»), play продовжує зі збереженої позиції.
+- `POST_NOTIFICATIONS` не запитуємо: медіанотифікації на Android 13+ звільнені від нього. Потрібні `FOREGROUND_SERVICE_MEDIA_PLAYBACK` і `WAKE_LOCK`.
+- UI-тести на емуляторі запускати з `-Pandroid.injected.androidTest.leaveApksInstalledAfterRun=true`, інакше Gradle видаляє застосунок разом з даними.
 
 **Етап 7. Віджет (Glance)**
 - Останній трек, play/pause/відновити, відкрити застосунок; оновлення з `PlayerController`.

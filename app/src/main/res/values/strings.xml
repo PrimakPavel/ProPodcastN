@@ -51,7 +51,6 @@
     <string name="duration_hours_minutes">%1$d h %2$d min</string>
     <string name="duration_minutes">%1$d min</string>
     <string name="share_episode_chooser_title">Share episode</string>
-    <string name="playback_coming_soon">Playback is coming soon.</string>
 
     <!-- Podcast details -->
     <string name="details_episodes">Episodes</string>
@@ -77,4 +76,18 @@
     <string name="favorites_episodes_empty">No favorite episodes yet.\nTap ♡ on an episode in podcast details to keep it here.</string>
     <string name="favorite_removed">Removed “%1$s”</string>
     <string name="action_undo">Undo</string>
+
+    <!-- Player -->
+    <string name="player_play">Play</string>
+    <string name="player_pause">Pause</string>
+    <string name="player_close">Close player</string>
+    <string name="player_collapse">Collapse player</string>
+    <string name="player_open">Open player</string>
+    <string name="player_seek_back">Back %1$d seconds</string>
+    <string name="player_seek_forward">Forward %1$d seconds</string>
+    <string name="player_speed">Playback speed %1$s</string>
+    <string name="player_continue">Continue listening</string>
+    <string name="player_error_network">Can’t load the episode. Check your connection.</string>
+    <string name="player_error_source">This episode can’t be played.</string>
+    <string name="player_no_audio">This episode has no audio file.</string>
 </resources>

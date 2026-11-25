@@ -55,6 +55,7 @@ class DataStoreUserPreferencesRepository @Inject constructor(
                 audioUrl = audioUrl,
                 imageUrl = prefs[Keys.LAST_IMAGE_URL],
                 positionMs = prefs[Keys.LAST_POSITION_MS] ?: 0L,
+                durationMs = prefs[Keys.LAST_DURATION_MS] ?: 0L,
             )
         }
         .distinctUntilChanged()
@@ -71,6 +72,7 @@ class DataStoreUserPreferencesRepository @Inject constructor(
             prefs[Keys.LAST_TITLE] = lastPlayed.title
             prefs[Keys.LAST_AUDIO_URL] = lastPlayed.audioUrl
             prefs[Keys.LAST_POSITION_MS] = lastPlayed.positionMs
+            prefs[Keys.LAST_DURATION_MS] = lastPlayed.durationMs
             prefs.setOrRemove(Keys.LAST_PODCAST_TITLE, lastPlayed.podcastTitle)
             prefs.setOrRemove(Keys.LAST_IMAGE_URL, lastPlayed.imageUrl)
         }
@@ -86,7 +88,7 @@ class DataStoreUserPreferencesRepository @Inject constructor(
         dataStore.edit { prefs ->
             listOf(
                 Keys.LAST_EPISODE_ID, Keys.LAST_TITLE, Keys.LAST_PODCAST_TITLE,
-                Keys.LAST_AUDIO_URL, Keys.LAST_IMAGE_URL, Keys.LAST_POSITION_MS,
+                Keys.LAST_AUDIO_URL, Keys.LAST_IMAGE_URL, Keys.LAST_POSITION_MS, Keys.LAST_DURATION_MS,
             ).forEach { prefs.remove(it) }
         }
     }
@@ -110,5 +112,6 @@ class DataStoreUserPreferencesRepository @Inject constructor(
         val LAST_AUDIO_URL = stringPreferencesKey("last_audio_url")
         val LAST_IMAGE_URL = stringPreferencesKey("last_image_url")
         val LAST_POSITION_MS = longPreferencesKey("last_position_ms")
+        val LAST_DURATION_MS = longPreferencesKey("last_duration_ms")
     }
 }
