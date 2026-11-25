@@ -1,0 +1,56 @@
+{
+ "recommendations": [
+  {
+   "id": "7060b5d48b3440ba9668f9af2a90fa7f",
+   "rss": "https://www.spreaker.com/show/4920844/episodes/feed",
+   "type": "episodic",
+   "extra": {
+    "url1": "",
+    "url2": "",
+    "url3": "",
+    "spotify_url": "https://open.spotify.com/show/62soqGPhnYJBRrP2vSAk6b",
+    "youtube_url": "",
+    "linkedin_url": "",
+    "wechat_handle": "",
+    "patreon_handle": "",
+    "twitter_handle": "",
+    "facebook_handle": "",
+    "amazon_music_url": "",
+    "instagram_handle": ""
+   },
+   "image": "https://cdn-images-3.listennotes.com/podcasts/the-tim-ferriss-show-5-minute-podcast-mpqMa73u08D-mYx8LcSkhz1.1400x1400.jp",
+   "title": "The Tim Ferriss Show | 5 minute podcast summaries",
+   "country": "United States",
+   "website": "https://www.spreaker.com/show/the-tim-ferriss-show-5-minute-podcast-su?utm_source=listennotes.com&utm_campaign=Listen+No",
+   "language": "English",
+   "genre_ids": [
+    111,
+    181,
+    67
+   ],
+   "itunes_id": 1556286643,
+   "publisher": "5 minute podcast summaries",
+   "thumbnail": "https://cdn-images-3.listennotes.com/podcasts/the-tim-ferriss-show-5-minute-podcast-XMuN8q2Jorb-mYx8LcSkhz1.300x300.jpg",
+   "is_claimed": false,
+   "description": "5 minute summaries of The Tim Ferriss Show's podcast episodes. Get the best insights and ideas in much less time, more a",
+   "looking_for": {
+    "guests": false,
+    "cohosts": false,
+    "sponsors": false,
+    "cross_promotion": false
+   },
+   "has_sponsors": false,
+   "listen_score": 35,
+   "total_episodes": 12,
+   "listennotes_url": "https://www.listennotes.com/c/7060b5d48b3440ba9668f9af2a90fa7f/",
+   "audio_length_sec": 221,
+   "explicit_content": false,
+   "latest_episode_id": "9163fe8fdfc34710af8d41b575023e07",
+   "latest_pub_date_ms": 1625881044000,
+   "earliest_pub_date_ms": 1619229600011,
+   "has_guest_interviews": false,
+   "update_frequency_hours": 165,
+   "listen_score_global_rank": "3%"
+  }
+ ]
+}

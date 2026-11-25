@@ -1,0 +1,33 @@
+{
+ "count": 1,
+ "total": 25,
+ "next_offset": 10,
+ "took": 0.1,
+ "results": [
+  {
+   "id": "ee84d7d11875465fb89487675ff5425d",
+   "title_original": "THE ED MYLETT SHOW",
+   "publisher_original": "Ed Mylett | Cumulus Podcast Network",
+   "description_original": "The Ed Mylett Show showcases the greatest peak-performers across all industries in one place, sharing their journey, kno",
+   "image": "https://cdn-images-3.listennotes.com/podcasts/the-ed-mylett-show-ed-mylett-cumulus-guxpvEVnHTJ-PEUIT9RBhZD.1400x1400.jpg",
+   "thumbnail": "https://cdn-images-3.listennotes.com/podcasts/the-ed-mylett-show-ed-mylett-cumulus-vQDCWVsEFw2-PEUIT9RBhZD.300x300.jpg",
+   "listennotes_url": "https://www.listennotes.com/c/ee84d7d11875465fb89487675ff5425d/",
+   "total_episodes": 391,
+   "genre_ids": [
+    88,
+    89,
+    90,
+    67,
+    157,
+    171,
+    111,
+    93,
+    181
+   ],
+   "latest_pub_date_ms": 1713427200000,
+   "explicit_content": false,
+   "title_highlighted": "x",
+   "rss": "https://feeds.megaphone.fm/WWO2015297742"
+  }
+ ]
+}

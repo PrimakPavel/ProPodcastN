@@ -110,7 +110,9 @@ com.propodcast.app
 - Тема (кольори/типографіка), `NavigationSuiteScaffold` з 3 вкладками-заглушками: Головна, Обране, Пошук.
 - Base URL і ключ через `BuildConfig`: debug → мок-сервер без ключа, release → продакшн-API з `LISTEN_NOTES_API_KEY` з `local.properties`.
 
-**Етап 1. Шар даних**
+**Етап 1. Шар даних** ✅
+- OkHttp зафіксовано на 5.4.0: 5.5.x вимагає compileSdk 37 (на машині лише SDK 36).
+- Тестовий сервер Listen Notes повертає ті самі фейкові дані на будь-який запит (той самий подкаст для будь-якого id, епізоди замість подкастів у пошуку), тож фікстури тестів для пошуку зібрані вручну у форматі реального API.
 - `ListenNotesApi` (6 ендпоінтів + `languages`), DTO, мапери, `AppError` (NoKey / NotFound / QuotaExceeded / Server / Network).
 - `PodcastRepository`, `BestPodcastsPagingSource` (page), `SearchPagingSource` (offset).
 - Room: `FavoritePodcastEntity`, `FavoriteEpisodeEntity` (+ `podcastTitle`, `addedAt` для сортування), DAO на Flow.
