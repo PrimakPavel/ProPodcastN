@@ -1,4 +1,4 @@
-package com.propodcast.app.ui.theme
+package com.propodcast.app.core.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 

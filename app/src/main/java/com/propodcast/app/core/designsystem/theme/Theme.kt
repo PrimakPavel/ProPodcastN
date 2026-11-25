@@ -1,4 +1,4 @@
-package com.propodcast.app.ui.theme
+package com.propodcast.app.core.designsystem.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

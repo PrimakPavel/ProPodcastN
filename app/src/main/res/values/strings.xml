@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Pro Podcast</string>
+    <string name="best_podcasts_title">Best podcasts</string>
+    <string name="favorites_title">Favorites</string>
+    <string name="search_title">Search</string>
+    <string name="coming_soon">Coming soon</string>
 </resources>
