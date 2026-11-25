@@ -8,6 +8,8 @@ import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.core.net.toUri
+import com.propodcast.app.core.analytics.AnalyticsEvents
+import com.propodcast.app.core.analytics.AnalyticsTracker
 import com.propodcast.app.core.data.repository.DownloadsRepository
 import com.propodcast.app.core.data.repository.UserPreferencesRepository
 import com.propodcast.app.core.model.DownloadStatus
@@ -44,6 +46,7 @@ class MediaPlayerController @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val preferences: UserPreferencesRepository,
     private val downloads: DownloadsRepository,
+    private val analytics: AnalyticsTracker,
 ) : PlayerController {
 
     // MediaController must be used on the main thread.
@@ -72,6 +75,13 @@ class MediaPlayerController @Inject constructor(
             val localFile = downloads.localFile(item.episodeId)
             val playUri = localFile?.toUri() ?: item.audioUrl.toUri()
             Timber.d("Playing %s from %s", item.episodeId, if (localFile != null) "downloaded file" else "stream")
+            analytics.logEvent(
+                AnalyticsEvents.PLAY_EPISODE,
+                mapOf(
+                    AnalyticsEvents.PARAM_SOURCE to
+                        if (localFile != null) AnalyticsEvents.SOURCE_DOWNLOAD else AnalyticsEvents.SOURCE_STREAM,
+                ),
+            )
             setMediaItem(item.toMediaItem(playUri), startPositionMs)
             prepare()
             play()

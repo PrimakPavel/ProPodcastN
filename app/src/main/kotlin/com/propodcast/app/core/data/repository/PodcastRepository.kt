@@ -3,6 +3,8 @@ package com.propodcast.app.core.data.repository
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import com.propodcast.app.core.analytics.AnalyticsEvents
+import com.propodcast.app.core.analytics.AnalyticsTracker
 import com.propodcast.app.core.common.apiCall
 import com.propodcast.app.core.data.cache.ReferenceDataCache
 import com.propodcast.app.core.data.paging.BestPodcastsPagingSource
@@ -41,6 +43,7 @@ interface PodcastRepository {
 class DefaultPodcastRepository @Inject constructor(
     private val api: ListenNotesApi,
     private val cache: ReferenceDataCache,
+    private val analytics: AnalyticsTracker,
 ) : PodcastRepository {
 
     override fun bestPodcasts(genreId: Int?, region: String?): Flow<PagingData<Podcast>> =
@@ -48,10 +51,14 @@ class DefaultPodcastRepository @Inject constructor(
             BestPodcastsPagingSource(api, genreId, region)
         }.flow
 
-    override fun searchPodcasts(query: String, language: String?): Flow<PagingData<Podcast>> =
-        Pager(pagingConfig(SearchPodcastsPagingSource.PAGE_SIZE)) {
+    override fun searchPodcasts(query: String, language: String?): Flow<PagingData<Podcast>> {
+        // The query itself is user-entered text: not sent.
+        val languageFilter = language?.takeUnless { it == ANY_LANGUAGE } != null
+        analytics.logEvent(AnalyticsEvents.SEARCH, mapOf(AnalyticsEvents.PARAM_LANGUAGE_FILTER to languageFilter.toString()))
+        return Pager(pagingConfig(SearchPodcastsPagingSource.PAGE_SIZE)) {
             SearchPodcastsPagingSource(api, query, language?.takeUnless { it == ANY_LANGUAGE })
         }.flow
+    }
 
     override suspend fun podcastDetails(id: String, nextEpisodePubDate: Long?): Result<PodcastDetails> =
         apiCall { api.podcast(id = id, nextEpisodePubDate = nextEpisodePubDate).toDetails() }

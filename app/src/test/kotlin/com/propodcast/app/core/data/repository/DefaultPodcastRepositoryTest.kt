@@ -1,5 +1,6 @@
 package com.propodcast.app.core.data.repository
 
+import com.propodcast.app.core.testing.FakeAnalyticsTracker
 import com.propodcast.app.core.testing.ListenNotesTestServer
 import com.propodcast.app.core.testing.TestClock
 import com.propodcast.app.core.testing.testDataStore
@@ -23,9 +24,10 @@ class DefaultPodcastRepositoryTest {
 
     private val server = ListenNotesTestServer()
     private val clock = TestClock(nowMs = 1_000)
+    private val analytics = FakeAnalyticsTracker()
 
     private fun TestScope.repository() =
-        DefaultPodcastRepository(server.api, testReferenceDataCache(testDataStore(tmp.root, backgroundScope), clock))
+        DefaultPodcastRepository(server.api, testReferenceDataCache(testDataStore(tmp.root, backgroundScope), clock), analytics)
 
     @After
     fun tearDown() = server.close()
@@ -95,6 +97,15 @@ class DefaultPodcastRepositoryTest {
         server.enqueueFixture("genres")
         repository.genres().getOrThrow()
         assertEquals(4, server.server.requestCount)
+    }
+
+    @Test
+    fun search_isLogged_withoutTheQuery() = runTest(UnconfinedTestDispatcher()) {
+        repository().searchPodcasts("my secret query", "Ukranian")
+        repository().searchPodcasts("other", null)
+
+        assertEquals(listOf("search {language_filter=true}", "search {language_filter=false}"), analytics.events)
+        assertFalse(analytics.events.any { "secret" in it })
     }
 
     @Test

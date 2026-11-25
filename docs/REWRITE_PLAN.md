@@ -63,7 +63,7 @@ Koin 1.0, RxJava2, LiveData + Paging 2, Kotlin synthetics, Otto, Picasso, Stetho
 | AppWidget + RemoteViews | Glance App Widget |
 | Timber | Timber (лишаємо) |
 | Stetho | прибираємо (App Inspection у Studio) |
-| Firebase / Fabric | не переносимо (рішення 2026-11-25) |
+| Firebase / Fabric | Firebase Crashlytics + Analytics (BOM 35.2.0); без FCM |
 
 ---
 
@@ -177,7 +177,9 @@ com.propodcast.app
 **Етап 8. Полірування**
 - Адаптивні сітки для планшетів/landscape, edge-to-edge, темна тема, accessibility (contentDescription).
 - Compose UI-тести ключових екранів, R8-правила, release-підпис (новий keystore поза git).
-- Firebase (Analytics / Crashlytics / FCM) не робимо: для цього застосунку зайве.
+- Firebase: Crashlytics + Analytics (FCM не робимо). `google-services.json` не в git (`app/.gitignore`); без нього збірка працює без Firebase — плагіни google-services / Crashlytics застосовуються лише за наявності файлу, `AnalyticsTracker` тоді no-op. У Firebase-проєкті два Android-застосунки: `com.propodcast.app` і `com.propodcast.app.debug`.
+  - Crashlytics: падіння + `CrashlyticsTree` (Timber WARN/ERROR → лог звіту, ERROR з винятком → non-fatal).
+  - Analytics: перегляди екранів з навігації, `play_episode` (source download/stream), `download_episode`, `add_favorite` (podcast/episode), `search` (лише прапорець мовного фільтра, без тексту запиту).
 
 ---
 
@@ -185,7 +187,7 @@ com.propodcast.app
 Otto, RxJava, Stetho, Multidex, `AppExecutors`, `ServerMocksUtil` (мови беремо з API), Fabric Crashlytics, ручні `MediaSessionHelper` / `AudioFocusHelper` / `MediaSessionNotificationsManager` / `UpdateByTimerHandler` (замінює Media3), старий `keystore.jks` і `google-services.json`.
 
 ## 6. Рішення (2026-11-25)
-1. **Firebase** — не робимо (вирішено 2026-11-25).
+1. **Firebase** — Crashlytics + Analytics (вирішено 2026-11-25), FCM не робимо.
 2. **API** — починаємо з мок-сервера `https://listen-api-test.listennotes.com/api/v2/` (без ключа) для debug. Справжній ключ пізніше: `LISTEN_NOTES_API_KEY` у `local.properties`, release ходить на продакшн-API.
 3. **Пошук** — лише подкасти, як у старому застосунку. Пошук епізодів — можлива окрема задача пізніше.
 4. **Офлайн-кеш** — не робимо.

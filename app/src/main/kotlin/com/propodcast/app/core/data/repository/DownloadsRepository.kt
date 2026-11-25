@@ -1,6 +1,8 @@
 package com.propodcast.app.core.data.repository
 
 import androidx.work.ExistingWorkPolicy
+import com.propodcast.app.core.analytics.AnalyticsEvents
+import com.propodcast.app.core.analytics.AnalyticsTracker
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.propodcast.app.core.database.dao.DownloadedEpisodeDao
@@ -54,6 +56,7 @@ class WorkManagerDownloadsRepository @Inject constructor(
     private val workManager: WorkManager,
     private val files: EpisodeFileStore,
     private val clock: Clock,
+    private val analytics: AnalyticsTracker,
 ) : DownloadsRepository {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -94,6 +97,7 @@ class WorkManagerDownloadsRepository @Inject constructor(
             ExistingWorkPolicy.REPLACE,
             EpisodeDownloadWorker.request(episode.id),
         )
+        analytics.logEvent(AnalyticsEvents.DOWNLOAD_EPISODE)
     }
 
     override suspend fun cancel(episodeId: String) {

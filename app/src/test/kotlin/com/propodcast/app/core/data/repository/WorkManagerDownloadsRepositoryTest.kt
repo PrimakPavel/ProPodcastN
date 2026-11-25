@@ -13,6 +13,7 @@ import com.propodcast.app.core.database.ProPodcastDatabase
 import com.propodcast.app.core.download.EpisodeDownloadWorker
 import com.propodcast.app.core.download.EpisodeFileStore
 import com.propodcast.app.core.model.DownloadStatus
+import com.propodcast.app.core.testing.FakeAnalyticsTracker
 import com.propodcast.app.core.testing.TestClock
 import com.propodcast.app.core.testing.testEpisode
 import kotlinx.coroutines.flow.first
@@ -38,6 +39,7 @@ class WorkManagerDownloadsRepositoryTest {
     private lateinit var workManager: WorkManager
     private lateinit var files: EpisodeFileStore
     private lateinit var repository: WorkManagerDownloadsRepository
+    private val analytics = FakeAnalyticsTracker()
 
     @Before
     fun setUp() {
@@ -48,7 +50,7 @@ class WorkManagerDownloadsRepositoryTest {
         workManager = WorkManager.getInstance(context)
         db = Room.inMemoryDatabaseBuilder(context, ProPodcastDatabase::class.java).allowMainThreadQueries().build()
         files = EpisodeFileStore(context)
-        repository = WorkManagerDownloadsRepository(db.downloadedEpisodeDao(), workManager, files, TestClock(1_000))
+        repository = WorkManagerDownloadsRepository(db.downloadedEpisodeDao(), workManager, files, TestClock(1_000), analytics)
     }
 
     @After
@@ -65,6 +67,7 @@ class WorkManagerDownloadsRepositoryTest {
         repository.enqueue(testEpisode("e1"))
 
         assertEquals(WorkInfo.State.ENQUEUED, workState())
+        assertEquals(listOf("download_episode"), analytics.events)
         val download = repository.downloads.first().single()
         assertEquals("e1", download.episode.id)
         assertEquals(DownloadStatus.QUEUED, download.state.status)

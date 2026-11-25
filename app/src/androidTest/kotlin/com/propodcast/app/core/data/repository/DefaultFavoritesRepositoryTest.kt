@@ -5,6 +5,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
+import com.propodcast.app.core.analytics.NoOpAnalyticsTracker
 import com.propodcast.app.core.database.ProPodcastDatabase
 import com.propodcast.app.core.model.Episode
 import com.propodcast.app.core.model.Podcast
@@ -30,7 +31,7 @@ class DefaultFavoritesRepositoryTest {
     fun setUp() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(context, ProPodcastDatabase::class.java).build()
-        repository = DefaultFavoritesRepository(db.favoritePodcastDao(), db.favoriteEpisodeDao(), clock)
+        repository = DefaultFavoritesRepository(db.favoritePodcastDao(), db.favoriteEpisodeDao(), clock, NoOpAnalyticsTracker)
     }
 
     @After

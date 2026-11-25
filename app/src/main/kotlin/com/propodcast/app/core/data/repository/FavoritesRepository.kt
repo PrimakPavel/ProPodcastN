@@ -1,5 +1,7 @@
 package com.propodcast.app.core.data.repository
 
+import com.propodcast.app.core.analytics.AnalyticsEvents
+import com.propodcast.app.core.analytics.AnalyticsTracker
 import com.propodcast.app.core.database.dao.FavoriteEpisodeDao
 import com.propodcast.app.core.database.dao.FavoritePodcastDao
 import com.propodcast.app.core.database.entity.toFavoriteEntity
@@ -38,6 +40,7 @@ class DefaultFavoritesRepository @Inject constructor(
     private val podcastDao: FavoritePodcastDao,
     private val episodeDao: FavoriteEpisodeDao,
     private val clock: Clock,
+    private val analytics: AnalyticsTracker,
 ) : FavoritesRepository {
 
     override val favoritePodcasts: Flow<List<Podcast>> =
@@ -53,6 +56,7 @@ class DefaultFavoritesRepository @Inject constructor(
     override suspend fun setPodcastFavorite(podcast: Podcast, favorite: Boolean) {
         if (favorite) {
             podcastDao.upsert(podcast.toFavoriteEntity(addedAt = clock.millis()))
+            analytics.logEvent(AnalyticsEvents.ADD_FAVORITE, mapOf(AnalyticsEvents.PARAM_TYPE to AnalyticsEvents.TYPE_PODCAST))
         } else {
             podcastDao.delete(podcast.id)
         }
@@ -61,6 +65,7 @@ class DefaultFavoritesRepository @Inject constructor(
     override suspend fun setEpisodeFavorite(episode: Episode, favorite: Boolean) {
         if (favorite) {
             episodeDao.upsert(episode.toFavoriteEntity(addedAt = clock.millis()))
+            analytics.logEvent(AnalyticsEvents.ADD_FAVORITE, mapOf(AnalyticsEvents.PARAM_TYPE to AnalyticsEvents.TYPE_EPISODE))
         } else {
             episodeDao.delete(episode.id)
         }

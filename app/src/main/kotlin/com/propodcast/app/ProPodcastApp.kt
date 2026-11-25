@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +55,8 @@ fun ProPodcastApp(
     playerViewModel: PlayerViewModel = hiltViewModel(),
     downloadsViewModel: DownloadsViewModel = hiltViewModel(),
     networkBannerViewModel: NetworkBannerViewModel = hiltViewModel(),
+    /** Called with the screen's name (route class) on every navigation, for analytics. */
+    onScreenView: (String) -> Unit = {},
 ) {
     val networkBanner by networkBannerViewModel.banner.collectAsStateWithLifecycle()
     val player by playerViewModel.uiState.collectAsStateWithLifecycle()
@@ -66,6 +69,8 @@ fun ProPodcastApp(
     // Keeps the tab highlighted while a nested screen (e.g. podcast details) is open.
     var selectedTab by rememberSaveable { mutableStateOf(TopLevelDestination.HOME) }
     backStackEntry?.destination?.topLevelDestination()?.let { selectedTab = it }
+    val screenName = backStackEntry?.destination?.route?.substringBefore('?')?.substringBefore('/')?.substringAfterLast('.')
+    LaunchedEffect(backStackEntry?.id) { screenName?.let(onScreenView) }
 
     // One layout for the app and the full player, so the artwork can fly between mini and full player.
     SharedTransitionLayout(modifier) {

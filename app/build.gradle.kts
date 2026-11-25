@@ -23,6 +23,15 @@ if (debugUsesProductionApi && listenNotesApiKey.isEmpty()) {
     throw GradleException("LISTEN_NOTES_USE_PRODUCTION=true needs LISTEN_NOTES_API_KEY in local.properties")
 }
 
+// Firebase (Analytics, Crashlytics) needs app/google-services.json, which is not in git. Without it the
+// app builds and runs as before, just without Firebase (AnalyticsTracker / CrashReporter do nothing).
+if (file("google-services.json").exists()) {
+    apply(plugin = libs.plugins.google.services.get().pluginId)
+    apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
+} else {
+    logger.lifecycle("app/google-services.json not found: building without Firebase")
+}
+
 val listenNotesMockUrl = "https://listen-api-test.listennotes.com/api/v2/"
 val listenNotesProductionUrl = "https://listen-api.listennotes.com/api/v2/"
 
@@ -102,6 +111,9 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material3.adaptive.navigation.suite)
     implementation(libs.androidx.material.icons.core)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.glance.material3)
     implementation(libs.androidx.media3.exoplayer)
