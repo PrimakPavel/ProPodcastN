@@ -108,10 +108,9 @@ class FavoritesContentTest {
         assertEquals(listOf("remove p1", "remove p2"), clicked)
     }
 
-    @Test
-    fun rowRestoredByUndo_canBeSwipedAgain() {
-        val p1 = podcast("p1")
-        var podcasts by mutableStateOf(listOf(p1))
+    /** Real flow: a swiped row is removed, then Undo puts the same item (same key) back. */
+    private fun setStatefulContent(initial: List<Podcast>): (List<Podcast>) -> Unit {
+        var podcasts by mutableStateOf(initial)
         composeRule.setContent {
             ProPodcastTheme {
                 FavoritesContent(
@@ -128,14 +127,40 @@ class FavoritesContentTest {
                 )
             }
         }
+        return { podcasts = it }
+    }
+
+    @Test
+    fun undoRightAfterSwipe_keepsRestoredRow() {
+        val p1 = podcast("p1")
+        val setPodcasts = setStatefulContent(listOf(p1, podcast("p2")))
+
+        composeRule.onNodeWithText("Podcast p1").performTouchInput { swipeLeft() }
+        composeRule.waitUntil { clicked.isNotEmpty() }
+        composeRule.mainClock.autoAdvance = false
+        composeRule.mainClock.advanceTimeBy(32) // the removal is drawn; a fade-out would still be running
+        setPodcasts(listOf(p1, podcast("p2"))) // Undo
+        composeRule.mainClock.autoAdvance = true
+        composeRule.waitForIdle()
+
+        assertEquals("restored row must not be removed again", listOf("remove p1"), clicked)
+        composeRule.onNodeWithText("Podcast p1").assertIsDisplayed()
+    }
+
+    @Test
+    fun undoAfterRowIsGone_keepsRestoredRow_andItCanBeSwipedAgain() {
+        val p1 = podcast("p1")
+        val setPodcasts = setStatefulContent(listOf(p1, podcast("p2")))
 
         composeRule.onNodeWithText("Podcast p1").performTouchInput { swipeLeft() }
         composeRule.waitForIdle()
-        podcasts = listOf(p1) // Undo
-        composeRule.waitForIdle()
-        composeRule.onNodeWithText("Podcast p1").assertIsDisplayed().performTouchInput { swipeLeft() }
+        composeRule.mainClock.advanceTimeBy(2_000)
+        setPodcasts(listOf(p1, podcast("p2"))) // Undo
         composeRule.waitForIdle()
 
+        assertEquals("restored row must not be removed again", listOf("remove p1"), clicked)
+        composeRule.onNodeWithText("Podcast p1").assertIsDisplayed().performTouchInput { swipeLeft() }
+        composeRule.waitForIdle()
         assertEquals(listOf("remove p1", "remove p1"), clicked)
     }
 

@@ -26,7 +26,7 @@ internal fun FavoritePodcastsList(
     }
     LazyColumn(modifier.testTag(FAVORITE_PODCASTS_LIST_TAG)) {
         items(podcasts, key = { it.id }) { podcast ->
-            SwipeToRemove(onRemove = { onRemove(podcast) }, modifier = Modifier.animateItem()) {
+            SwipeToRemove(onRemove = { onRemove(podcast) }, modifier = removableItemModifier()) {
                 PodcastListItem(
                     podcast = podcast,
                     isFavorite = true,
