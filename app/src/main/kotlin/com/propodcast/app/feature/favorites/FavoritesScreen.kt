@@ -25,6 +25,7 @@ fun FavoritesScreen(
     onPodcastClick: (Podcast) -> Unit,
     onPlayEpisode: (Episode) -> Boolean,
     modifier: Modifier = Modifier,
+    initialTab: FavoritesTab = FavoritesTab.PODCASTS,
     viewModel: FavoritesViewModel = hiltViewModel(),
     downloadsViewModel: DownloadsViewModel = hiltViewModel(),
 ) {
@@ -44,6 +45,7 @@ fun FavoritesScreen(
     FavoritesContent(
         state = state,
         downloads = downloads,
+        initialTab = initialTab,
         snackbarHostState = snackbarHostState,
         onPodcastClick = onPodcastClick,
         onRemovePodcast = viewModel::removePodcast,

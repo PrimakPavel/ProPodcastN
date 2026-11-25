@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,12 +16,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.propodcast.app.R
 
-/** Full-area message (error or empty list) with an optional Retry button. */
+/** Full-area message (error or empty list) with an optional Retry button and an optional second action. */
 @Composable
 fun MessageState(
     message: String,
     modifier: Modifier = Modifier,
     onRetry: (() -> Unit)? = null,
+    secondaryAction: MessageAction? = null,
 ) {
     Column(
         modifier = modifier
@@ -36,6 +38,9 @@ fun MessageState(
         )
         if (onRetry != null) {
             Button(onClick = onRetry) { Text(stringResource(R.string.action_retry)) }
+        }
+        if (secondaryAction != null) {
+            OutlinedButton(onClick = secondaryAction.onClick) { Text(secondaryAction.label) }
         }
     }
 }

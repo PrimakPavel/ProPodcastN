@@ -5,10 +5,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.propodcast.app.core.data.repository.ApiQuotaRepository
+import com.propodcast.app.core.data.repository.DownloadsRepository
 import com.propodcast.app.core.data.repository.FavoritesRepository
 import com.propodcast.app.core.data.repository.PodcastRepository
 import com.propodcast.app.core.data.repository.UserPreferencesRepository
 import com.propodcast.app.core.model.ApiQuota
+import com.propodcast.app.core.model.DownloadStatus
 import com.propodcast.app.core.model.Podcast
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -30,6 +32,7 @@ class HomeViewModel @Inject constructor(
     userPreferences: UserPreferencesRepository,
     apiQuotaRepository: ApiQuotaRepository,
     private val favoritesRepository: FavoritesRepository,
+    downloadsRepository: DownloadsRepository,
 ) : ViewModel() {
 
     /** Restarts paging from page 1 whenever the genre or region filter changes. */
@@ -43,6 +46,12 @@ class HomeViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), emptySet())
 
     val quota: StateFlow<ApiQuota?> = apiQuotaRepository.quota
+
+    /** At least one episode can be played offline: worth offering when the list can't load. */
+    val hasDownloads: StateFlow<Boolean> = downloadsRepository.downloads
+        .map { list -> list.any { it.state.status == DownloadStatus.DOWNLOADED } }
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), false)
 
     fun toggleFavorite(podcast: Podcast) {
         val makeFavorite = podcast.id !in favoriteIds.value

@@ -21,6 +21,7 @@ import com.propodcast.app.feature.filters.FiltersViewModel
 @Composable
 fun HomeScreen(
     onPodcastClick: (Podcast) -> Unit,
+    onOpenDownloads: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     filtersViewModel: FiltersViewModel = hiltViewModel(),
@@ -28,6 +29,7 @@ fun HomeScreen(
     val podcasts = viewModel.podcasts.collectAsLazyPagingItems()
     val favoriteIds by viewModel.favoriteIds.collectAsStateWithLifecycle()
     val quota by viewModel.quota.collectAsStateWithLifecycle()
+    val hasDownloads by viewModel.hasDownloads.collectAsStateWithLifecycle()
     val filtersState by filtersViewModel.uiState.collectAsStateWithLifecycle()
     var sheetTab by rememberSaveable { mutableStateOf<FiltersTab?>(null) }
     val context = LocalContext.current
@@ -44,6 +46,7 @@ fun HomeScreen(
             podcast.listennotesUrl?.let { context.shareLink(podcast.title, it, shareTitle) }
         },
         onOpenFilters = { tab -> sheetTab = tab },
+        onOpenDownloads = onOpenDownloads.takeIf { hasDownloads },
         onClearGenre = { filtersViewModel.selectGenre(null) },
         onClearRegion = { filtersViewModel.selectRegion(null) },
         modifier = modifier,

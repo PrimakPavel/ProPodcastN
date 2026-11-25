@@ -56,6 +56,7 @@ class HomeContentTest {
         onOpenFilters: (FiltersTab) -> Unit = {},
         onClearGenre: () -> Unit = {},
         filtersPinned: Boolean = false,
+        onOpenDownloads: (() -> Unit)? = null,
     ) {
         composeRule.setContent {
             ProPodcastTheme {
@@ -71,6 +72,7 @@ class HomeContentTest {
                     onClearGenre = onClearGenre,
                     onClearRegion = {},
                     filtersPinned = filtersPinned,
+                    onOpenDownloads = onOpenDownloads,
                 )
             }
         }
@@ -100,6 +102,30 @@ class HomeContentTest {
 
         composeRule.onNodeWithText("Too many requests", substring = true).assertIsDisplayed()
         composeRule.onNodeWithText("Retry").assertIsDisplayed()
+    }
+
+    @Test
+    fun offlineWithDownloads_offersGoToDownloads() {
+        var opened = 0
+        val error = LoadState.Error(AppException(AppError.Network))
+        setContent(data = PagingData.from(emptyList(), LoadStates(error, done, done)), onOpenDownloads = { opened++ })
+
+        composeRule.onNodeWithText("Go to downloads").performClick()
+
+        assertEquals(1, opened)
+    }
+
+    @Test
+    fun emptyList_withDownloads_offersGoToDownloads() {
+        setContent(data = PagingData.from(emptyList(), LoadStates(done, done, done)), onOpenDownloads = {})
+        composeRule.onNodeWithText("Go to downloads").assertIsDisplayed()
+    }
+
+    @Test
+    fun refreshError_withoutDownloads_hasNoDownloadsButton() {
+        val error = LoadState.Error(AppException(AppError.Network))
+        setContent(data = PagingData.from(emptyList(), LoadStates(error, done, done)))
+        composeRule.onNodeWithText("Go to downloads").assertDoesNotExist()
     }
 
     @Test

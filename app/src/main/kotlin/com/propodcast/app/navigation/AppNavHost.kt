@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,6 +15,7 @@ import com.propodcast.app.core.ui.LocalNavAnimatedVisibilityScope
 import com.propodcast.app.feature.details.DetailsPreview
 import com.propodcast.app.feature.details.PodcastDetailsScreen
 import com.propodcast.app.feature.favorites.FavoritesScreen
+import com.propodcast.app.feature.favorites.FavoritesTab
 import com.propodcast.app.feature.home.HomeScreen
 import com.propodcast.app.feature.search.SearchScreen
 
@@ -31,12 +33,25 @@ fun AppNavHost(
     ) {
         composable<HomeRoute> {
             Destination(this, origin = "home") {
-                HomeScreen(onPodcastClick = { navController.navigate(it.detailsRoute("home")) })
+                HomeScreen(
+                    onPodcastClick = { navController.navigate(it.detailsRoute("home")) },
+                    onOpenDownloads = {
+                        // Like the bottom bar's Favorites, but straight to the Downloaded tab.
+                        navController.navigate(FavoritesRoute(initialTab = FavoritesTab.DOWNLOADS.name)) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                        }
+                    },
+                )
             }
         }
-        composable<FavoritesRoute> {
+        composable<FavoritesRoute> { entry ->
+            val initialTab = entry.toRoute<FavoritesRoute>().initialTab
+                ?.let { name -> FavoritesTab.entries.firstOrNull { it.name == name } }
+                ?: FavoritesTab.PODCASTS
             Destination(this, origin = "favorites") {
                 FavoritesScreen(
+                    initialTab = initialTab,
                     onPodcastClick = { navController.navigate(it.detailsRoute("favorites")) },
                     onPlayEpisode = onPlayEpisode,
                 )

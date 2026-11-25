@@ -38,6 +38,7 @@
     <string name="quota_resets_on">Resets on %1$s.</string>
 
     <!-- Home -->
+    <string name="home_go_to_downloads">Go to downloads</string>
     <string name="home_empty">No podcasts for these filters.</string>
 
     <!-- Filters -->

@@ -17,6 +17,6 @@ enum class TopLevelDestination(
     @StringRes val labelRes: Int,
 ) {
     HOME(HomeRoute, HomeRoute::class, Icons.Filled.Home, R.string.best_podcasts_title),
-    FAVORITES(FavoritesRoute, FavoritesRoute::class, Icons.Filled.Favorite, R.string.favorites_title),
+    FAVORITES(FavoritesRoute(), FavoritesRoute::class, Icons.Filled.Favorite, R.string.favorites_title),
     SEARCH(SearchRoute, SearchRoute::class, Icons.Filled.Search, R.string.search_title),
 }

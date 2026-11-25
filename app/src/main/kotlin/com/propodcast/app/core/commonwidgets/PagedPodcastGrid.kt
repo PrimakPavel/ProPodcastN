@@ -17,7 +17,8 @@ import com.propodcast.app.core.ui.userMessage
 
 /**
  * Paged podcasts grid (one column on phones, more on wide screens) with full-screen loading,
- * error with retry and [emptyMessage] states, pull to refresh and an append footer.
+ * error with retry and [emptyMessage] states (both with an optional [emptyAction]), pull to refresh and an
+ * append footer.
  */
 @Composable
 fun PagedPodcastGrid(
@@ -29,14 +30,26 @@ fun PagedPodcastGrid(
     onShare: (Podcast) -> Unit,
     modifier: Modifier = Modifier,
     gridTestTag: String = PAGED_PODCAST_GRID_TAG,
+    /** Shown under the error / empty message when there is nothing to list. */
+    emptyAction: MessageAction? = null,
 ) {
     val refresh = podcasts.loadState.refresh
     when {
         podcasts.itemCount == 0 && refresh is LoadState.Loading -> LoadingState(modifier)
         podcasts.itemCount == 0 && refresh is LoadState.Error ->
-            MessageState(message = refresh.error.userMessage(), modifier = modifier, onRetry = podcasts::retry)
+            MessageState(
+                message = refresh.error.userMessage(),
+                modifier = modifier,
+                onRetry = podcasts::retry,
+                secondaryAction = emptyAction,
+            )
         podcasts.itemCount == 0 && refresh is LoadState.NotLoading && podcasts.loadState.append.endOfPaginationReached ->
-            MessageState(message = emptyMessage, modifier = modifier, onRetry = podcasts::refresh)
+            MessageState(
+                message = emptyMessage,
+                modifier = modifier,
+                onRetry = podcasts::refresh,
+                secondaryAction = emptyAction,
+            )
         else -> PullToRefreshBox(
             isRefreshing = refresh is LoadState.Loading,
             onRefresh = podcasts::refresh,

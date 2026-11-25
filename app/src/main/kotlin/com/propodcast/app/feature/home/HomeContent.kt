@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.paging.compose.LazyPagingItems
 import com.propodcast.app.R
 import com.propodcast.app.core.commonwidgets.FloatingHeader
+import com.propodcast.app.core.commonwidgets.MessageAction
 import com.propodcast.app.core.commonwidgets.PagedPodcastGrid
 import com.propodcast.app.core.commonwidgets.QuotaBanner
 import com.propodcast.app.core.commonwidgets.rememberFloatingHeaderScrollBehavior
@@ -43,6 +44,8 @@ fun HomeContent(
     onClearRegion: () -> Unit,
     modifier: Modifier = Modifier,
     filtersPinned: Boolean = false,
+    /** When set, an empty or failed list offers "Go to downloads" (e.g. offline with downloaded episodes). */
+    onOpenDownloads: (() -> Unit)? = null,
 ) {
     // Filter chips hide while scrolling down and come back on scroll up (pass filtersPinned = true to keep them).
     val filtersScrollBehavior = rememberFloatingHeaderScrollBehavior(pinned = filtersPinned)
@@ -82,6 +85,9 @@ fun HomeContent(
                 onToggleFavorite = onToggleFavorite,
                 onShare = onShare,
                 gridTestTag = PODCASTS_LIST_TAG,
+                emptyAction = onOpenDownloads?.let {
+                    MessageAction(stringResource(R.string.home_go_to_downloads), it)
+                },
             )
         }
     }
