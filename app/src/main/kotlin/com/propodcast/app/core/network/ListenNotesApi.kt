@@ -52,6 +52,9 @@ interface ListenNotesApi {
         const val SORT_RECENT_FIRST = "recent_first"
         const val TYPE_PODCAST = "podcast"
 
+        /** Region used by `best_podcasts` when none is passed (per the API docs). */
+        const val DEFAULT_REGION = "us"
+
         /** The "no language filter" entry returned by `GET languages`. */
         const val ANY_LANGUAGE = "Any language"
     }

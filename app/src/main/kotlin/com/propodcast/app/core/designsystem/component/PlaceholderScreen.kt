@@ -21,10 +21,16 @@ fun PlaceholderScreen(
     title: String,
     message: String,
     modifier: Modifier = Modifier,
+    onBack: (() -> Unit)? = null,
 ) {
     Scaffold(
         modifier = modifier,
-        topBar = { TopAppBar(title = { Text(title) }) },
+        topBar = {
+            TopAppBar(
+                title = { Text(title) },
+                navigationIcon = { if (onBack != null) BackButton(onClick = onBack) },
+            )
+        },
     ) { innerPadding ->
         Box(
             modifier = Modifier

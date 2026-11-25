@@ -4,4 +4,45 @@
     <string name="favorites_title">Favorites</string>
     <string name="search_title">Search</string>
     <string name="coming_soon">Coming soon</string>
+    <string name="podcast_details_title">Podcast</string>
+
+    <!-- Common actions -->
+    <string name="action_retry">Retry</string>
+    <string name="action_back">Back</string>
+    <string name="action_share">Share</string>
+    <string name="action_more">More options</string>
+    <string name="action_add_to_favorites">Add to favorites</string>
+    <string name="action_remove_from_favorites">Remove from favorites</string>
+    <string name="action_filters">Filters</string>
+    <string name="action_clear_filter">Clear %1$s filter</string>
+    <string name="share_chooser_title">Share podcast</string>
+
+    <plurals name="episodes_count">
+        <item quantity="one">%d episode</item>
+        <item quantity="other">%d episodes</item>
+    </plurals>
+
+    <!-- Errors (AppError) -->
+    <string name="error_unauthorized">The Listen Notes API key is missing or invalid, or the account is suspended.</string>
+    <string name="error_not_found">Nothing was found.</string>
+    <string name="error_too_many_requests">Too many requests to Listen Notes. The free plan has a monthly quota and a rate limit, so try again later.</string>
+    <string name="error_client">The request could not be processed (error %1$d).</string>
+    <string name="error_server">Listen Notes is having problems (error %1$d). Try again later.</string>
+    <string name="error_network">No internet connection.</string>
+    <string name="error_unknown">Something went wrong.</string>
+
+    <!-- API quota -->
+    <string name="quota_running_low">Listen Notes quota is running low: %1$d of %2$d requests used.</string>
+    <string name="quota_exhausted">Listen Notes quota is used up (%1$d of %2$d requests).</string>
+    <string name="quota_resets_on">Resets on %1$s.</string>
+
+    <!-- Home -->
+    <string name="home_empty">No podcasts for these filters.</string>
+
+    <!-- Filters -->
+    <string name="filters_genre">Genre</string>
+    <string name="filters_region">Region</string>
+    <string name="filters_all_genres">All genres</string>
+    <string name="filters_default_region_suffix">%1$s (default)</string>
+    <string name="filters_load_error">Could not load the list.</string>
 </resources>

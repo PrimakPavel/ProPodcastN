@@ -119,7 +119,9 @@ com.propodcast.app
 - DataStore: фільтри (жанр, регіон, мова), останній трек (url, назва, автор, обкладинка, позиція).
 - Юніт-тести: мапери, PagingSource (MockWebServer), репозиторії.
 
-**Етап 2. Головна + фільтри**
+**Етап 2. Головна + фільтри** ✅
+- Coil зафіксовано на 3.4.0: 3.6.x тягне Compose 1.12, якому потрібен compileSdk 37.
+- У Listen Notes немає регіону «усі»: без параметра `region` API повертає США, тому «без фільтра» показується як «United States (default)».
 - Попередження про квоту API: `ApiQuotaRepository.quota` (з заголовків `X-ListenAPI-Usage` / `X-ListenAPI-FreeQuota`), банер при `isRunningLow()` / `isExhausted`.
 - Список best podcasts з Paging 3, стани loading / error + retry / empty.
 - Фільтри Жанр/Регіон (bottom sheet з вкладками або окремий екран), збереження в DataStore, перезавантаження списку при зміні.
