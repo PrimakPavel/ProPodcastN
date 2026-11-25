@@ -34,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.propodcast.app.R
 import com.propodcast.app.core.designsystem.theme.ProPodcastTheme
+import com.propodcast.app.core.ui.sharedPodcastArtwork
 import com.propodcast.app.core.model.Podcast
 
 /**
@@ -56,7 +57,10 @@ fun PodcastListItem(
             .padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        PodcastImage(url = podcast.thumbnailUrl, modifier = Modifier.size(72.dp))
+        PodcastImage(
+            url = podcast.thumbnailUrl,
+            modifier = Modifier.sharedPodcastArtwork(podcast.id).size(72.dp),
+        )
         Spacer(Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(

@@ -22,6 +22,7 @@ fun PodcastDetailsScreen(
     onPodcastClick: (Podcast) -> Unit,
     onPlayEpisode: (Episode) -> Boolean,
     modifier: Modifier = Modifier,
+    preview: DetailsPreview = DetailsPreview(),
     viewModel: PodcastDetailsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -51,5 +52,6 @@ fun PodcastDetailsScreen(
         },
         onPodcastClick = onPodcastClick,
         modifier = modifier,
+        preview = preview,
     )
 }

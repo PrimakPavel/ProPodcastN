@@ -1,27 +1,28 @@
 package com.propodcast.app.feature.player.widgets
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.propodcast.app.core.ui.formatPlaybackTime
 import com.propodcast.app.feature.player.PLAYER_SEEK_BAR_TAG
 
 /** Slider with elapsed and remaining time. Seeks once the thumb is released, not on every move. */
-@OptIn(ExperimentalMaterial3Api::class) // custom slider track
 @Composable
 internal fun PlayerSeekBar(
     positionMs: Long,
@@ -33,20 +34,30 @@ internal fun PlayerSeekBar(
     val known = durationMs > 0
     val fraction = dragFraction ?: if (known) (positionMs.toFloat() / durationMs).coerceIn(0f, 1f) else 0f
     val shownPositionMs = if (dragFraction != null) (fraction * durationMs).toLong() else positionMs
+    val currentOnSeek by rememberUpdatedState(onSeek)
+    val currentDurationMs by rememberUpdatedState(durationMs)
+
+    val sliderState = remember { SliderState() }
+    // Otherwise the thumb follows playback.
+    SideEffect { if (dragFraction == null) sliderState.value = fraction }
 
     Column(modifier.fillMaxWidth()) {
         Slider(
-            value = fraction,
-            onValueChange = { dragFraction = it },
+            state = sliderState,
+            // While the user drags, the thumb follows the finger; the player seeks on release.
+            onValueChange = { value ->
+                dragFraction = value
+                sliderState.value = value
+            },
             onValueChangeFinished = {
-                dragFraction?.let { onSeek((it * durationMs).toLong()) }
+                dragFraction?.let { currentOnSeek((it * currentDurationMs).toLong()) }
                 dragFraction = null
             },
             enabled = known,
             modifier = Modifier.testTag(PLAYER_SEEK_BAR_TAG),
             // Only a hairline gap between the thumb and the track (the default is 6 dp).
-            track = { sliderState ->
-                SliderDefaults.Track(sliderState = sliderState, enabled = known, thumbTrackGapSize = 1.dp)
+            track = { state ->
+                SliderDefaults.Track(sliderState = state, enabled = known, thumbTrackGapSize = 1.dp)
             },
         )
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {

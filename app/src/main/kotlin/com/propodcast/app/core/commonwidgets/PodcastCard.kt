@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.propodcast.app.core.model.Podcast
+import com.propodcast.app.core.ui.sharedPodcastArtwork
 
 /** Compact podcast tile for horizontal rows (e.g. recommendations). */
 @Composable
@@ -30,6 +31,7 @@ fun PodcastCard(
         PodcastImage(
             url = podcast.thumbnailUrl,
             modifier = Modifier
+                .sharedPodcastArtwork(podcast.id)
                 .fillMaxWidth()
                 .aspectRatio(1f),
         )

@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -30,7 +29,6 @@ import com.propodcast.app.feature.filters.FiltersUiState
 import com.propodcast.app.feature.home.widgets.ActiveFilters
 
 /** Stateless home content, also used by UI tests. */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeContent(
     podcasts: LazyPagingItems<Podcast>,

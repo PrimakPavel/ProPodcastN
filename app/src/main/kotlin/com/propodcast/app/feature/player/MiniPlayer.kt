@@ -1,5 +1,6 @@
 package com.propodcast.app.feature.player
 
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -25,11 +25,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.propodcast.app.R
-import com.propodcast.app.core.commonwidgets.PodcastImage
+import com.propodcast.app.feature.player.widgets.MiniPlayerArtwork
 import com.propodcast.app.feature.player.widgets.PlayPauseButton
 import com.propodcast.app.feature.player.widgets.playerSubtitle
 
-/** Compact player above the navigation bar; a tap opens the full player. Draws nothing without an episode. */
+/**
+ * Compact player above the navigation bar; a tap opens the full player. Draws nothing without an episode.
+ * With a [sharedTransitionScope], the artwork flies into the full player while [expanded].
+ */
 @Composable
 fun MiniPlayer(
     state: PlayerUiState,
@@ -37,6 +40,8 @@ fun MiniPlayer(
     onTogglePlayPause: () -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
+    expanded: Boolean = false,
+    sharedTransitionScope: SharedTransitionScope? = null,
 ) {
     val item = state.playback.nowPlaying ?: return
     Surface(
@@ -65,7 +70,12 @@ fun MiniPlayer(
                     .padding(start = 12.dp, end = 4.dp, top = 6.dp, bottom = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                PodcastImage(url = item.imageUrl, modifier = Modifier.size(44.dp))
+                MiniPlayerArtwork(
+                    imageUrl = item.imageUrl,
+                    size = ARTWORK_SIZE,
+                    expanded = expanded,
+                    sharedTransitionScope = sharedTransitionScope,
+                )
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
@@ -100,3 +110,5 @@ fun MiniPlayer(
         }
     }
 }
+
+private val ARTWORK_SIZE = 44.dp

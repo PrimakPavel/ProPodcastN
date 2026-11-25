@@ -13,6 +13,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +37,7 @@ import com.propodcast.app.feature.player.widgets.SpeedButton
 import com.propodcast.app.feature.player.widgets.playerSubtitle
 
 /** Stateless full player: artwork, titles, seek bar, -15 / play / +30 and speed. Also used by UI tests. */
+@OptIn(ExperimentalMaterial3Api::class) // BottomSheetDefaults.DragHandle
 @Composable
 fun FullPlayerContent(
     state: PlayerUiState,
@@ -45,6 +48,8 @@ fun FullPlayerContent(
     onSeekForward: () -> Unit,
     onCycleSpeed: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Extra modifier for the artwork, e.g. a shared element transition from the mini player. */
+    artworkModifier: Modifier = Modifier,
 ) {
     val playback = state.playback
     val item = playback.nowPlaying ?: return
@@ -56,6 +61,7 @@ fun FullPlayerContent(
             .testTag(FULL_PLAYER_TAG),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        BottomSheetDefaults.DragHandle(Modifier.align(Alignment.CenterHorizontally))
         Row(Modifier.fillMaxWidth()) {
             IconButton(onClick = onCollapse) {
                 Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.player_collapse))
@@ -63,7 +69,7 @@ fun FullPlayerContent(
         }
         PodcastImage(
             url = item.imageUrl,
-            modifier = Modifier
+            modifier = artworkModifier
                 .widthIn(max = 320.dp)
                 .fillMaxWidth(0.85f)
                 .aspectRatio(1f),

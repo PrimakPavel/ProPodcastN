@@ -28,12 +28,17 @@ val listenNotesProductionUrl = "https://listen-api.listennotes.com/api/v2/"
 
 android {
     namespace = "com.propodcast.app"
-    compileSdk = 36
+    // Android 17 platform 37.2 (Compose 1.13 needs 37.1+).
+    compileSdk {
+        version = release(37) {
+            minorApiLevel = 2
+        }
+    }
 
     defaultConfig {
         applicationId = "com.propodcast.app"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0.0"
 

@@ -154,6 +154,11 @@ com.propodcast.app
 - `POST_NOTIFICATIONS` не запитуємо: медіанотифікації на Android 13+ звільнені від нього. Потрібні `FOREGROUND_SERVICE_MEDIA_PLAYBACK` і `WAKE_LOCK`.
 - UI-тести на емуляторі запускати з `-Pandroid.injected.androidTest.leaveApksInstalledAfterRun=true`, інакше Gradle видаляє застосунок разом з даними.
 
+**Між етапами 6 і 7: тулчейн і hero-анімації** ✅
+- compileSdk 37.2 (`compileSdk { version = release(37) { minorApiLevel = 2 } }`), targetSdk 37; Gradle 9.9.2, AGP 9.5.3, Kotlin 2.4.21, Compose BOM 2026.11.01 (Compose 1.13, Material3 1.5), Hilt 2.60.1, OkHttp 5.5.1, Coil 3.6.3 та ін.
+- Виправлено розбіжність Compose: BOM давав 1.9.4 для компіляції, а paging-compose тягнув 1.10 у рантайм; на `sharedElement` це дало `NoSuchMethodError`.
+- Shared element transitions (стабільні з Compose 1.13): обкладинка летить міні-плеєр ↔ повний плеєр (повний плеєр тепер оверлей у дереві, закривається свайпом униз / назад / ⌄) і список → деталі подкасту. Ключ містить екран-джерело (`home/…`, `favorites/…`), щоб подкаст на двох вкладках не «літав» між ними. Деталі одразу показують обкладинку й назву з маршруту, решта довантажується.
+
 **Етап 7. Віджет (Glance)**
 - Останній трек, play/pause/відновити, відкрити застосунок; оновлення з `PlayerController`.
 

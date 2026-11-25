@@ -3,7 +3,6 @@ package com.propodcast.app.core.commonwidgets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -20,7 +19,6 @@ import com.propodcast.app.core.ui.userMessage
  * Paged podcasts grid (one column on phones, more on wide screens) with full-screen loading,
  * error with retry and [emptyMessage] states, pull to refresh and an append footer.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PagedPodcastGrid(
     podcasts: LazyPagingItems<Podcast>,

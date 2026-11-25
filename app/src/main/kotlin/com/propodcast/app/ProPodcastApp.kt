@@ -1,6 +1,7 @@
 package com.propodcast.app
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
@@ -8,6 +9,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -23,7 +25,8 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.propodcast.app.feature.player.FullPlayerSheet
+import com.propodcast.app.core.ui.LocalSharedTransitionScope
+import com.propodcast.app.feature.player.FullPlayerOverlay
 import com.propodcast.app.feature.player.MiniPlayer
 import com.propodcast.app.feature.player.PlayerViewModel
 import com.propodcast.app.navigation.AppNavHost
@@ -43,8 +46,9 @@ fun ProPodcastApp(
     var selectedTab by rememberSaveable { mutableStateOf(TopLevelDestination.HOME) }
     backStackEntry?.destination?.topLevelDestination()?.let { selectedTab = it }
 
+    // One layout for the app and the full player, so the artwork can fly between mini and full player.
+    SharedTransitionLayout(modifier) {
     NavigationSuiteScaffold(
-        modifier = modifier,
         navigationSuiteItems = {
             TopLevelDestination.entries.forEach { destination ->
                 item(
@@ -57,32 +61,37 @@ fun ProPodcastApp(
         },
     ) {
         Column {
-            AppNavHost(
-                navController = navController,
-                onPlayEpisode = playerViewModel::play,
-                modifier = Modifier.weight(1f),
-            )
+            CompositionLocalProvider(LocalSharedTransitionScope provides this@SharedTransitionLayout) {
+                AppNavHost(
+                    navController = navController,
+                    onPlayEpisode = playerViewModel::play,
+                    modifier = Modifier.weight(1f),
+                )
+            }
             AnimatedVisibility(visible = player.isVisible, enter = expandVertically(), exit = shrinkVertically()) {
                 MiniPlayer(
                     state = player,
                     onOpen = { showFullPlayer = true },
                     onTogglePlayPause = playerViewModel::togglePlayPause,
                     onClose = playerViewModel::stop,
+                    expanded = showFullPlayer,
+                    sharedTransitionScope = this@SharedTransitionLayout,
                 )
             }
         }
     }
 
-    if (showFullPlayer && player.isVisible) {
-        FullPlayerSheet(
-            state = player,
-            onDismiss = { showFullPlayer = false },
-            onTogglePlayPause = playerViewModel::togglePlayPause,
-            onSeekTo = playerViewModel::seekTo,
-            onSeekBack = playerViewModel::seekBack,
-            onSeekForward = playerViewModel::seekForward,
-            onCycleSpeed = playerViewModel::cycleSpeed,
-        )
+    FullPlayerOverlay(
+        visible = showFullPlayer && player.isVisible,
+        state = player,
+        sharedTransitionScope = this@SharedTransitionLayout,
+        onCollapse = { showFullPlayer = false },
+        onTogglePlayPause = playerViewModel::togglePlayPause,
+        onSeekTo = playerViewModel::seekTo,
+        onSeekBack = playerViewModel::seekBack,
+        onSeekForward = playerViewModel::seekForward,
+        onCycleSpeed = playerViewModel::cycleSpeed,
+    )
     }
 }
 

@@ -1,5 +1,6 @@
 package com.propodcast.app.feature.details
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -8,7 +9,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -30,13 +30,13 @@ import com.propodcast.app.core.commonwidgets.MessageState
 import com.propodcast.app.core.model.Episode
 import com.propodcast.app.core.model.Podcast
 import com.propodcast.app.core.ui.message
+import com.propodcast.app.core.ui.sharedArtwork
 import com.propodcast.app.feature.details.widgets.episodesSection
 import com.propodcast.app.feature.details.widgets.PodcastDetailsHeader
 import com.propodcast.app.feature.details.widgets.loadMoreFooter
 import com.propodcast.app.feature.details.widgets.recommendationsSection
 
 /** Stateless details content, also used by UI tests. */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PodcastDetailsContent(
     state: PodcastDetailsUiState,
@@ -51,8 +51,10 @@ fun PodcastDetailsContent(
     onPodcastClick: (Podcast) -> Unit,
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    preview: DetailsPreview = DetailsPreview(),
 ) {
     val loaded = state.content as? DetailsContent.Loaded
+    val artworkModifier = Modifier.sharedArtwork(preview.artworkKey)
     Scaffold(
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -60,7 +62,7 @@ fun PodcastDetailsContent(
             TopAppBar(
                 title = {
                     Text(
-                        text = loaded?.podcast?.title ?: stringResource(R.string.podcast_details_title),
+                        text = loaded?.podcast?.title ?: preview.title ?: stringResource(R.string.podcast_details_title),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -94,13 +96,28 @@ fun PodcastDetailsContent(
             .fillMaxSize()
             .padding(innerPadding)
         when (val content = state.content) {
-            DetailsContent.Loading -> LoadingState(contentModifier)
+            DetailsContent.Loading -> if (preview.title != null) {
+                // Artwork and title from the list right away (the artwork flight lands here), the rest loads below.
+                Column(contentModifier.padding(top = 16.dp)) {
+                    PodcastDetailsHeader(preview.toPodcast(), artworkModifier = artworkModifier)
+                    LoadingState(Modifier.weight(1f))
+                }
+            } else {
+                LoadingState(contentModifier)
+            }
             is DetailsContent.Error -> MessageState(content.error.message(), contentModifier, onRetry = onRetry)
             is DetailsContent.Loaded -> LazyColumn(
                 modifier = contentModifier.testTag(DETAILS_LIST_TAG),
                 contentPadding = PaddingValues(vertical = 16.dp),
             ) {
-                item(key = "header") { PodcastDetailsHeader(content.podcast) }
+                item(key = "header") {
+                    val podcast = content.podcast
+                    // Keep the list's artwork so the image doesn't change once the details arrive.
+                    PodcastDetailsHeader(
+                        podcast = podcast.copy(thumbnailUrl = preview.artworkUrl ?: podcast.thumbnailUrl),
+                        artworkModifier = artworkModifier,
+                    )
+                }
                 recommendationsSection(state.recommendations, onPodcastClick)
                 episodesSection(content, state.favoriteEpisodeIds, onEpisodeClick, onToggleEpisodeFavorite, onShareEpisode)
                 loadMoreFooter(content, onLoadMore)

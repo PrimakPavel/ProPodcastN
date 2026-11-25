@@ -18,15 +18,20 @@ import com.propodcast.app.core.commonwidgets.ExpandableHtmlText
 import com.propodcast.app.core.commonwidgets.PodcastImage
 import com.propodcast.app.core.model.Podcast
 
-/** Artwork, title, publisher, episode count and the (HTML) description. */
+/**
+ * Artwork, title, publisher, episode count and the (HTML) description. The artwork is the list thumbnail
+ * (300 px, enough for 120 dp), so it is already cached when the details open; [artworkModifier] makes it
+ * the end of the artwork flight from the list.
+ */
 @Composable
 fun PodcastDetailsHeader(
     podcast: Podcast,
     modifier: Modifier = Modifier,
+    artworkModifier: Modifier = Modifier,
 ) {
     Column(modifier.padding(horizontal = 16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            PodcastImage(url = podcast.imageUrl, modifier = Modifier.size(120.dp))
+            PodcastImage(url = podcast.thumbnailUrl ?: podcast.imageUrl, modifier = artworkModifier.size(120.dp))
             Spacer(Modifier.width(16.dp))
             Column {
                 Text(podcast.title, style = MaterialTheme.typography.titleLarge)
